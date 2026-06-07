@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bot Admin Panel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #5b6ef5;
+    --accent2: #8b5cf6;
+    --green: #22d3a0;
+    --red: #f55b6e;
+    --yellow: #f5c55b;
+    --text: #e8e8f0;
+    --muted: #666680;
+    --card: #13131e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(91,110,245,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,110,245,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    padding: 24px 0;
+  }
+
+  .logo {
+    padding: 0 20px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 10px;
+  }
+  .logo h1 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 1px; }
+  .logo span { font-size: 10px; color: var(--muted); }
+
+  .nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    color: var(--muted);
+    border: 1px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active {
+    background: rgba(91,110,245,0.12);
+    color: var(--accent);
+    border-color: rgba(91,110,245,0.2);
+  }
+  .nav-item .ico { font-size: 15px; width: 20px; text-align: center; }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    margin-left: auto;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* MAIN */
+  .main {
+    margin-left: 220px;
+    padding: 32px;
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+  .page-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .config-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .config-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* PAGES */
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-top: 8px; }
+  .stat-icon { position: absolute; right: 16px; top: 16px; font-size: 20px; opacity: 0.3; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+
+  /* SEARCH */
+  .search-bar {
+    display: flex; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .search-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #4a5de0; transform: translateY(-1px); }
+  .btn-danger { background: rgba(245,91,110,0.15); color: var(--red); border: 1px solid rgba(245,91,110,0.3); }
+  .btn-danger:hover { background: rgba(245,91,110,0.25); }
+  .btn-success { background: rgba(34,211,160,0.15); color: var(--green); border: 1px solid rgba(34,211,160,0.3); }
+  .btn-success:hover { background: rgba(34,211,160,0.25); }
+  .btn-ghost { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 6px 12px; font-size: 11px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 12px 12px; font-size: 12px; border-bottom: 1px solid rgba(42,42,58,0.5); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(91,110,245,0.03); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px; border-radius: 4px; font-size: 10px;
+  }
+  .badge-green { background: rgba(34,211,160,0.15); color: var(--green); }
+  .badge-blue  { background: rgba(91,110,245,0.15); color: var(--accent); }
+  .badge-red   { background: rgba(245,91,110,0.15); color: var(--red); }
+
+  .empty-state {
+    text-align: center; padding: 40px; color: var(--muted); font-size: 12px;
+  }
+  .empty-state .big { font-size: 32px; margin-bottom: 8px; }
+
+  /* SEND MESSAGE */
+  .channel-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .channel-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .channel-card:hover, .channel-card.selected {
+    border-color: var(--accent);
+    background: rgba(91,110,245,0.08);
+  }
+  .channel-card .ch-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .channel-card .ch-id { font-size: 10px; color: var(--muted); }
+
+  .msg-area {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    min-height: 120px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .msg-area:focus { border-color: var(--accent); }
+
+  .preview-box {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px;
+    font-size: 13px; line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .preview-link { color: var(--accent); text-decoration: underline; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 420px;
+    max-width: 90vw;
+    animation: modalIn 0.25s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+  .modal p  { font-size: 11px; color: var(--muted); margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* CONFIG */
+  .config-form { display: flex; flex-direction: column; gap: 14px; }
+  .form-group label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+  /* TOAST */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; font-size: 12px;
+    display: flex; align-items: center; gap: 10px;
+    animation: toastIn 0.3s ease;
+    min-width: 260px;
+  }
+  @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.error   { border-left: 3px solid var(--red); }
+  .toast.info    { border-left: 3px solid var(--accent); }
+
+  /* LOADER */
+  .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  .tag { display: inline-flex; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🤖</div>
+    <h1>BOT PANEL</h1>
+    <span>Admin Dashboard</span>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" onclick="goPage('dashboard')">
+      <span class="ico">📊</span> Дашборд
+      <div class="status-dot"></div>
+    </div>
+    <div class="nav-item" onclick="goPage('whitelist')">
+      <span class="ico">👥</span> Whitelist
+    </div>
+    <div class="nav-item" onclick="goPage('channels')">
+      <span class="ico">📡</span> Каналы
+    </div>
+    <div class="nav-item" onclick="goPage('send')">
+      <span class="ico">📨</span> Отправить
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="pageTitle">Дашборд</div>
+      <div class="page-sub" id="pageSub">Общая статистика</div>
+    </div>
+    <button class="config-btn" onclick="openConfig()">⚙️ Настройки</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">В Whitelist</div>
+        <div class="stat-value" id="stat-wl">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📡</div>
+        <div class="stat-label">Каналов</div>
+        <div class="stat-value" id="stat-ch">—</div>
+      </div>
+      <div class="stat-card" style="--accent:#22d3a0">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Статус</div>
+        <div class="stat-value" style="font-size:14px;margin-top:14px;color:var(--green)">ONLINE</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🕐</div>
+        <div class="stat-label">Обновлено</div>
+        <div class="stat-value" style="font-size:13px;margin-top:14px" id="stat-time">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Последние в Whitelist</div>
+        <button class="btn btn-ghost btn-sm" onclick="goPage('whitelist')">Все →</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>User ID</th><th>Добавлен</th></tr></thead>
+          <tbody id="dash-wl-table"><tr><td colspan="3" class="empty-state"><div class="loader"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Каналы</div>
+        <button class="btn btn-ghost btn-sm" onclick="goPage('channels')">Все →</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Название</th><th>ID</th><th>Username</th></tr></thead>
+          <tbody id="dash-ch-table"><tr><td colspan="4" class="empty-state"><div class="loader"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHITELIST -->
+  <div class="page" id="page-whitelist">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Управление Whitelist</div>
+        <button class="btn btn-primary btn-sm" onclick="openAddUser()">➕ Добавить</button>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" id="wl-search" placeholder="🔍 Поиск по ID пользователя..." oninput="filterWL()">
+        <button class="btn btn-ghost btn-sm" onclick="loadWhitelist()">↻ Обновить</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>User ID</th><th>Добавлен</th><th>Действия</th></tr></thead>
+          <tbody id="wl-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANNELS -->
+  <div class="page" id="page-channels">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Управление каналами</div>
+        <button class="btn btn-primary btn-sm" onclick="openAddChannel()">➕ Добавить</button>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" id="ch-search" placeholder="🔍 Поиск по названию или ID..." oninput="filterChannels()">
+        <button class="btn btn-ghost btn-sm" onclick="loadChannels()">↻ Обновить</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Название</th><th>Channel ID</th><th>Username</th><th>Действия</th></tr></thead>
+          <tbody id="ch-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEND MESSAGE -->
+  <div class="page" id="page-send">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Выберите канал</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadChannels(); renderSendChannels()">↻</button>
+      </div>
+      <div id="send-channels" class="channel-grid"></div>
+    </div>
+
+    <div class="card" id="send-form-card" style="display:none">
+      <div class="card-header">
+        <div class="card-title">Сообщение для <span id="send-ch-name" style="color:var(--accent)"></span></div>
+      </div>
+      <textarea class="msg-area" id="msg-text" placeholder="Введите текст сообщения..." oninput="updatePreview()"></textarea>
+      <div class="divider"></div>
+      <div class="card-title" style="font-size:12px;margin-bottom:10px;color:var(--muted)">ПРЕДПРОСМОТР</div>
+      <div class="preview-box" id="msg-preview">Напишите сообщение выше...</div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary" onclick="sendMessage()" id="send-btn">📨 Отправить в канал</button>
+        <button class="btn btn-ghost" onclick="clearSend()">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL: CONFIG -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal">
+    <h3>⚙️ Настройки подключения</h3>
+    <p>Укажи данные от Supabase. Они сохраняются в localStorage.</p>
+    <div class="config-form">
+      <div class="form-group">
+        <label>Supabase URL</label>
+        <input class="search-input" id="cfg-url" placeholder="https://xxx.supabase.co">
+      </div>
+      <div class="form-group">
+        <label>Supabase Anon Key</label>
+        <input class="search-input" id="cfg-key" placeholder="eyJ..." type="password">
+      </div>
+      <div class="form-group">
+        <label>Bot Token (для отправки)</label>
+        <input class="search-input" id="cfg-bot" placeholder="1234567890:AAE..." type="password">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-config')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveConfig()">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD USER -->
+<div class="modal-overlay" id="modal-add-user">
+  <div class="modal">
+    <h3>➕ Добавить в Whitelist</h3>
+    <p>Введи Telegram ID пользователя (числовой)</p>
+    <div class="form-group">
+      <label>Telegram User ID</label>
+      <input class="search-input" id="new-user-id" placeholder="123456789" type="number"
+        onkeydown="if(event.key==='Enter')addUser()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-user')">Отмена</button>
+      <button class="btn btn-primary" onclick="addUser()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD CHANNEL -->
+<div class="modal-overlay" id="modal-add-channel">
+  <div class="modal">
+    <h3>➕ Добавить канал</h3>
+    <p>Введи данные канала вручную (бот должен быть админом)</p>
+    <div class="config-form">
+      <div class="form-group">
+        <label>Channel ID (числовой, например -1001234567890)</label>
+        <input class="search-input" id="new-ch-id" placeholder="-1001234567890">
+      </div>
+      <div class="form-group">
+        <label>Название канала</label>
+        <input class="search-input" id="new-ch-title" placeholder="Мой канал">
+      </div>
+      <div class="form-group">
+        <label>Username (без @, необязательно)</label>
+        <input class="search-input" id="new-ch-username" placeholder="mychannel">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-channel')">Отмена</button>
+      <button class="btn btn-primary" onclick="addChannel()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────
+let CFG = {
+  url: localStorage.getItem('sb_url') || '',
+  key: localStorage.getItem('sb_key') || '',
+  bot: localStorage.getItem('tg_bot') || '',
+};
+
+let wlData = [];
+let chData = [];
+let selectedChannel = null;
+
+function openConfig() {
+  document.getElementById('cfg-url').value = CFG.url;
+  document.getElementById('cfg-key').value = CFG.key;
+  document.getElementById('cfg-bot').value = CFG.bot;
+  openModal('modal-config');
+}
+
+function saveConfig() {
+  CFG.url = document.getElementById('cfg-url').value.trim();
+  CFG.key = document.getElementById('cfg-key').value.trim();
+  CFG.bot = document.getElementById('cfg-bot').value.trim();
+  localStorage.setItem('sb_url', CFG.url);
+  localStorage.setItem('sb_key', CFG.key);
+  localStorage.setItem('tg_bot', CFG.bot);
+  closeModal('modal-config');
+  toast('✅ Настройки сохранены', 'success');
+  loadAll();
+}
+
+// ── SUPABASE API ────────────────────────────────────────────────────
+async function sbFetch(path, opts = {}) {
+  if (!CFG.url || !CFG.key) {
+    toast('⚠️ Настрой подключение (кнопка ⚙️)', 'error');
+    throw new Error('no config');
+  }
+  const res = await fetch(CFG.url + '/rest/v1/' + path, {
+    headers: {
+      'apikey': CFG.key,
+      'Authorization': 'Bearer ' + CFG.key,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation',
+      ...opts.headers
+    },
+    ...opts
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.message || res.statusText);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────────
+const pageTitles = {
+  dashboard: ['Дашборд', 'Общая статистика'],
+  whitelist:  ['Whitelist', 'Управление доступом пользователей'],
+  channels:   ['Каналы', 'Управление Telegram каналами'],
+  send:       ['Отправить сообщение', 'Выбери канал и напиши текст'],
+};
+
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item')[['dashboard','whitelist','channels','send'].indexOf(id)].classList.add('active');
+  const [t, s] = pageTitles[id];
+  document.getElementById('pageTitle').textContent = t;
+  document.getElementById('pageSub').textContent = s;
+  if (id === 'send') renderSendChannels();
+}
+
+// ── WHITELIST ───────────────────────────────────────────────────────
+async function loadWhitelist() {
+  try {
+    wlData = await sbFetch('whitelist?order=created_at.desc');
+    renderWL(wlData);
+    renderDashWL(wlData);
+    document.getElementById('stat-wl').textContent = wlData.length;
+  } catch(e) { if(e.message !== 'no config') toast('Ошибка WL: ' + e.message, 'error'); }
+}
+
+function renderWL(data) {
+  const tb = document.getElementById('wl-table');
+  if (!data.length) { tb.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="big">👥</div>Список пуст</div></td></tr>'; return; }
+  tb.innerHTML = data.map((r,i) => `
+    <tr>
+      <td><span class="badge badge-blue">${i+1}</span></td>
+      <td><span class="tag">🆔 ${r.user_id}</span></td>
+      <td style="color:var(--muted)">${r.created_at ? new Date(r.created_at).toLocaleString('ru') : '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${r.user_id})">🗑 Удалить</button></td>
+    </tr>`).join('');
+}
+
+function renderDashWL(data) {
+  const tb = document.getElementById('dash-wl-table');
+  const top = data.slice(0,5);
+  if (!top.length) { tb.innerHTML = '<tr><td colspan="3"><div class="empty-state">Пусто</div></td></tr>'; return; }
+  tb.innerHTML = top.map((r,i) => `
+    <tr>
+      <td><span class="badge badge-blue">${i+1}</span></td>
+      <td>🆔 ${r.user_id}</td>
+      <td style="color:var(--muted)">${r.created_at ? new Date(r.created_at).toLocaleString('ru') : '—'}</td>
+    </tr>`).join('');
+}
+
+function filterWL() {
+  const q = document.getElementById('wl-search').value.toLowerCase();
+  renderWL(wlData.filter(r => String(r.user_id).includes(q)));
+}
+
+function openAddUser() {
+  document.getElementById('new-user-id').value = '';
+  openModal('modal-add-user');
+}
+
+async function addUser() {
+  const id = document.getElementById('new-user-id').value.trim();
+  if (!id || isNaN(id)) { toast('Введи корректный ID', 'error'); return; }
+  try {
+    await sbFetch('whitelist', { method: 'POST', body: JSON.stringify({ user_id: parseInt(id) }) });
+    closeModal('modal-add-user');
+    toast('✅ Пользователь ' + id + ' добавлен', 'success');
+    loadWhitelist();
+  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+async function deleteUser(uid) {
+  if (!confirm('Удалить ' + uid + ' из whitelist?')) return;
+  try {
+    await sbFetch('whitelist?user_id=eq.' + uid, { method: 'DELETE', prefer: 'return=minimal' });
+    toast('🗑 Пользователь ' + uid + ' удалён', 'info');
+    loadWhitelist();
+  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+// ── CHANNELS ────────────────────────────────────────────────────────
+async function loadChannels() {
+  try {
+    chData = await sbFetch('channels?order=created_at.desc');
+    renderChannels(chData);
+    renderDashChannels(chData);
+    document.getElementById('stat-ch').textContent = chData.length;
+  } catch(e) { if(e.message !== 'no config') toast('Ошибка каналов: ' + e.message, 'error'); }
+}
+
+function renderChannels(data) {
+  const tb = document.getElementById('ch-table');
+  if (!data.length) { tb.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="big">📡</div>Нет каналов</div></td></tr>'; return; }
+  tb.innerHTML = data.map((r,i) => `
+    <tr>
+      <td><span class="badge badge-blue">${i+1}</span></td>
+      <td><b>${r.title || '—'}</b></td>
+      <td><code style="font-size:11px;color:var(--muted)">${r.channel_id}</code></td>
+      <td>${r.username ? '<span class="badge badge-green">@' + r.username + '</span>' : '<span class="badge">—</span>'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteChannel('${r.channel_id}')">🗑 Удалить</button></td>
+    </tr>`).join('');
+}
+
+function renderDashChannels(data) {
+  const tb = document.getElementById('dash-ch-table');
+  const top = data.slice(0,5);
+  if (!top.length) { tb.innerHTML = '<tr><td colspan="4"><div class="empty-state">Пусто</div></td></tr>'; return; }
+  tb.innerHTML = top.map((r,i) => `
+    <tr>
+      <td><span class="badge badge-blue">${i+1}</span></td>
+      <td>${r.title || '—'}</td>
+      <td><code style="font-size:11px;color:var(--muted)">${r.channel_id}</code></td>
+      <td>${r.username ? '@'+r.username : '—'}</td>
+    </tr>`).join('');
+}
+
+function filterChannels() {
+  const q = document.getElementById('ch-search').value.toLowerCase();
+  renderChannels(chData.filter(r =>
+    (r.title||'').toLowerCase().includes(q) ||
+    String(r.channel_id).includes(q) ||
+    (r.username||'').toLowerCase().includes(q)
+  ));
+}
+
+function openAddChannel() {
+  ['new-ch-id','new-ch-title','new-ch-username'].forEach(id => document.getElementById(id).value = '');
+  openModal('modal-add-channel');
+}
+
+async function addChannel() {
+  const id    = document.getElementById('new-ch-id').value.trim();
+  const title = document.getElementById('new-ch-title').value.trim();
+  const uname = document.getElementById('new-ch-username').value.trim().replace('@','');
+  if (!id || !title) { toast('Заполни ID и название', 'error'); return; }
+  try {
+    await sbFetch('channels', { method: 'POST', body: JSON.stringify({ channel_id: id, title, username: uname }) });
+    closeModal('modal-add-channel');
+    toast('✅ Канал добавлен', 'success');
+    loadChannels();
+  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+async function deleteChannel(cid) {
+  if (!confirm('Удалить канал ' + cid + '?')) return;
+  try {
+    await sbFetch('channels?channel_id=eq.' + encodeURIComponent(cid), { method: 'DELETE', prefer: 'return=minimal' });
+    toast('🗑 Канал удалён', 'info');
+    loadChannels();
+  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+// ── SEND MESSAGE ────────────────────────────────────────────────────
+function renderSendChannels() {
+  const el = document.getElementById('send-channels');
+  if (!chData.length) {
+    el.innerHTML = '<div class="empty-state"><div class="big">📡</div>Нет каналов. Добавь их во вкладке «Каналы».</div>';
+    return;
+  }
+  el.innerHTML = chData.map(ch => `
+    <div class="channel-card ${selectedChannel?.channel_id === ch.channel_id ? 'selected':''}"
+         onclick="selectChannel(${JSON.stringify(ch).replace(/"/g,'&quot;')})">
+      <div class="ch-name">📡 ${ch.title || 'Без названия'}</div>
+      <div class="ch-id">${ch.username ? '@'+ch.username : ch.channel_id}</div>
+    </div>`).join('');
+}
+
+function selectChannel(ch) {
+  selectedChannel = ch;
+  renderSendChannels();
+  const name = ch.username ? '@'+ch.username : ch.title;
+  document.getElementById('send-ch-name').textContent = name;
+  document.getElementById('send-form-card').style.display = 'block';
+  updatePreview();
+}
+
+function updatePreview() {
+  const text = document.getElementById('msg-text').value;
+  const ch = selectedChannel;
+  if (!ch) return;
+  const name = ch.username ? '@'+ch.username : ch.title;
+  const link = ch.username ? 'https://t.me/'+ch.username : '';
+  const sub = link
+    ? `\n\n<a href="${link}" class="preview-link">📢 Подписаться на ${name}</a>`
+    : `\n\n📢 Подписаться на ${name}`;
+  document.getElementById('msg-preview').innerHTML = (text || '') + sub;
+}
+
+async function sendMessage() {
+  const text = document.getElementById('msg-text').value.trim();
+  if (!text) { toast('Напиши сообщение', 'error'); return; }
+  if (!selectedChannel) { toast('Выбери канал', 'error'); return; }
+  if (!CFG.bot) { toast('Укажи Bot Token в настройках', 'error'); return; }
+
+  const ch = selectedChannel;
+  const name = ch.username ? '@'+ch.username : ch.title;
+  const link = ch.username ? 'https://t.me/'+ch.username : '';
+  const sub = link
+    ? `\n\n<a href="${link}">📢 Подписаться на ${name}</a>`
+    : `\n\n📢 Подписаться на ${name}`;
+  const finalText = text + sub;
+
+  const btn = document.getElementById('send-btn');
+  btn.innerHTML = '<div class="loader"></div> Отправка...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${CFG.bot}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: ch.channel_id,
+        text: finalText,
+        parse_mode: 'HTML',
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      toast('✅ Сообщение отправлено в ' + name, 'success');
+      clearSend();
+    } else {
+      toast('Ошибка TG: ' + data.description, 'error');
+    }
+  } catch(e) {
+    toast('Ошибка: ' + e.message, 'error');
+  } finally {
+    btn.innerHTML = '📨 Отправить в канал';
+    btn.disabled = false;
+  }
+}
+
+function clearSend() {
+  selectedChannel = null;
+  document.getElementById('msg-text').value = '';
+  document.getElementById('msg-preview').innerHTML = 'Напишите сообщение выше...';
+  document.getElementById('send-form-card').style.display = 'none';
+  renderSendChannels();
+}
+
+// ── MODAL ───────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if(e.target === el) el.classList.remove('open'); });
+});
+
+// ── TOAST ────────────────────────────────────────────────────────────
+function toast(msg, type='info') {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.style.opacity = '0', 2500);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+async function loadAll() {
+  document.getElementById('stat-time').textContent = new Date().toLocaleTimeString('ru');
+  await Promise.all([loadWhitelist(), loadChannels()]);
+}
+
+if (!CFG.url || !CFG.key) {
+  setTimeout(() => {
+    toast('⚙️ Настрой подключение к Supabase!', 'info');
+    openConfig();
+  }, 500);
+} else {
+  loadAll();
+}
+</script>
+</body>
+</html>
