@@ -1,901 +1,790 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bot Admin Panel</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap');
+:root {
+  --bg: #0a0a0f;
+  --bg2: #0f0f18;
+  --bg3: #16161f;
+  --bg4: #1c1c28;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --accent: #5b6ef5;
+  --accent2: #7c5cf5;
+  --green: #22d3a0;
+  --red: #f55b6e;
+  --yellow: #f5c55b;
+  --text: #e8e8f2;
+  --muted: #55556a;
+  --muted2: #888899;
+  --font: 'JetBrains Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; font-family: var(--font); background: var(--bg); color: var(--text); overflow-x:hidden; }
 
-  :root {
-    --bg: #0a0a0f;
-    --bg2: #111118;
-    --bg3: #1a1a24;
-    --border: #2a2a3a;
-    --accent: #5b6ef5;
-    --accent2: #8b5cf6;
-    --green: #22d3a0;
-    --red: #f55b6e;
-    --yellow: #f5c55b;
-    --text: #e8e8f0;
-    --muted: #666680;
-    --card: #13131e;
-  }
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: linear-gradient(rgba(91,110,245,.025) 1px,transparent 1px), linear-gradient(90deg,rgba(91,110,245,.025) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none; z-index:0;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ─── LAYOUT ─── */
+.layout { display:flex; min-height:100vh; position:relative; z-index:1; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width:220px; flex-shrink:0;
+  background: var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  position:fixed; top:0; left:0; bottom:0; z-index:200;
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.closed { transform: translateX(-100%); }
 
-  /* GRID BACKGROUND */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(91,110,245,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(91,110,245,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+.logo {
+  padding:22px 20px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+}
+.logo-icon {
+  width:34px; height:34px; border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+.logo-text { font-size:13px; font-weight:800; letter-spacing:.5px; }
+.logo-sub  { font-size:9px; color:var(--muted2); margin-top:1px; }
 
-  /* SIDEBAR */
-  .sidebar {
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    width: 220px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
-    padding: 24px 0;
-  }
+.nav { flex:1; padding:14px 10px; display:flex; flex-direction:column; gap:3px; }
 
-  .logo {
-    padding: 0 20px 28px;
-    border-bottom: 1px solid var(--border);
-  }
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; margin-bottom: 10px;
-  }
-  .logo h1 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 1px; }
-  .logo span { font-size: 10px; color: var(--muted); }
+.nav-item {
+  display:flex; align-items:center; gap:9px;
+  padding:9px 11px; border-radius:8px; cursor:pointer;
+  font-size:11px; font-weight:500; color:var(--muted2);
+  border:1px solid transparent; transition:all .18s;
+  user-select:none;
+}
+.nav-item:hover { background:var(--bg3); color:var(--text); }
+.nav-item.active { background:rgba(91,110,245,.13); color:var(--accent); border-color:rgba(91,110,245,.2); }
+.nav-item .ico { font-size:14px; width:18px; text-align:center; flex-shrink:0; }
+.nav-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); margin-left:auto; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  .nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+/* ─── BURGER ─── */
+.burger {
+  display:none;
+  position:fixed; top:14px; left:14px; z-index:300;
+  width:38px; height:38px; background:var(--bg2);
+  border:1px solid var(--border); border-radius:9px;
+  align-items:center; justify-content:center; cursor:pointer;
+  flex-direction:column; gap:5px; padding:0;
+}
+.burger span {
+  display:block; width:16px; height:1.5px;
+  background:var(--text); border-radius:2px;
+  transition:all .25s;
+}
+.burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+.burger.open span:nth-child(2) { opacity:0; }
+.burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
 
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 12px;
-    color: var(--muted);
-    border: 1px solid transparent;
-    user-select: none;
-  }
-  .nav-item:hover { background: var(--bg3); color: var(--text); }
-  .nav-item.active {
-    background: rgba(91,110,245,0.12);
-    color: var(--accent);
-    border-color: rgba(91,110,245,0.2);
-  }
-  .nav-item .ico { font-size: 15px; width: 20px; text-align: center; }
+.overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.55); z-index:150; backdrop-filter:blur(3px);
+}
+.overlay.open { display:block; }
 
-  .status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    margin-left: auto;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+/* ─── MAIN ─── */
+.main {
+  margin-left:220px; flex:1;
+  padding:28px 28px 40px;
+  min-height:100vh;
+  transition: margin-left .25s;
+}
 
-  /* MAIN */
-  .main {
-    margin-left: 220px;
-    padding: 32px;
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
-  }
+/* ─── TOPBAR ─── */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:26px;
+}
+.topbar-left { display:flex; align-items:center; gap:12px; }
+.page-title { font-size:18px; font-weight:800; }
+.page-sub   { font-size:10px; color:var(--muted2); margin-top:2px; }
 
-  /* TOPBAR */
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 32px;
-  }
-  .page-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
-  .page-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.cfg-btn {
+  background:var(--bg3); border:1px solid var(--border2);
+  color:var(--muted2); padding:7px 14px; border-radius:8px;
+  font-family:var(--font); font-size:10px; font-weight:500;
+  cursor:pointer; transition:all .18s; white-space:nowrap;
+}
+.cfg-btn:hover { border-color:var(--accent); color:var(--accent); }
 
-  .config-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .config-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* ─── PAGES ─── */
+.page { display:none; animation:fadeUp .28s ease; }
+.page.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
 
-  /* PAGES */
-  .page { display: none; animation: fadeIn 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+/* ─── STATS ─── */
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.stat-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:11px; padding:18px 16px; position:relative; overflow:hidden;
+}
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1.5px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+.stat-lbl  { font-size:9px; color:var(--muted2); text-transform:uppercase; letter-spacing:1.2px; }
+.stat-val  { font-size:26px; font-weight:800; margin-top:7px; line-height:1; }
+.stat-icon { position:absolute; right:14px; top:14px; font-size:18px; opacity:.2; }
 
-  /* STATS GRID */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  .stat-card::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
-  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-top: 8px; }
-  .stat-icon { position: absolute; right: 16px; top: 16px; font-size: 20px; opacity: 0.3; }
+/* ─── CARD ─── */
+.card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:20px; margin-bottom:18px;
+}
+.card-head {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px;
+}
+.card-title { font-size:12px; font-weight:700; }
 
-  /* CARDS */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+/* ─── SEARCH BAR ─── */
+.sbar { display:flex; gap:8px; margin-bottom:14px; }
+.sinput {
+  flex:1; background:var(--bg3); border:1px solid var(--border);
+  border-radius:8px; padding:9px 13px; color:var(--text);
+  font-family:var(--font); font-size:11px; outline:none; transition:border-color .18s;
+}
+.sinput:focus { border-color:var(--accent); }
+.sinput::placeholder { color:var(--muted); }
 
-  /* SEARCH */
-  .search-bar {
-    display: flex; gap: 10px;
-    margin-bottom: 16px;
-  }
-  .search-input {
-    flex: 1;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-input:focus { border-color: var(--accent); }
-  .search-input::placeholder { color: var(--muted); }
+/* ─── BUTTONS ─── */
+.btn {
+  padding:8px 15px; border-radius:8px; border:none;
+  font-family:var(--font); font-size:11px; font-weight:500;
+  cursor:pointer; transition:all .18s;
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:#4a5de0; transform:translateY(-1px); }
+.btn-danger  { background:rgba(245,91,110,.12); color:var(--red); border:1px solid rgba(245,91,110,.25); }
+.btn-danger:hover { background:rgba(245,91,110,.22); }
+.btn-success { background:rgba(34,211,160,.12); color:var(--green); border:1px solid rgba(34,211,160,.25); }
+.btn-ghost   { background:var(--bg3); color:var(--muted2); border:1px solid var(--border); }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+.btn-sm { padding:5px 11px; font-size:10px; }
 
-  /* BUTTONS */
-  .btn {
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: none;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex; align-items: center; gap: 6px;
-    white-space: nowrap;
-  }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: #4a5de0; transform: translateY(-1px); }
-  .btn-danger { background: rgba(245,91,110,0.15); color: var(--red); border: 1px solid rgba(245,91,110,0.3); }
-  .btn-danger:hover { background: rgba(245,91,110,0.25); }
-  .btn-success { background: rgba(34,211,160,0.15); color: var(--green); border: 1px solid rgba(34,211,160,0.3); }
-  .btn-success:hover { background: rgba(34,211,160,0.25); }
-  .btn-ghost { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-sm { padding: 6px 12px; font-size: 11px; }
+/* ─── TABLE ─── */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding:6px 10px; border-bottom:1px solid var(--border); font-weight:500; }
+td { padding:10px 10px; font-size:11px; border-bottom:1px solid rgba(255,255,255,.03); }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(91,110,245,.03); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:9px; font-weight:600; }
+.b-blue  { background:rgba(91,110,245,.15); color:#8b9ef7; }
+.b-green { background:rgba(34,211,160,.13); color:var(--green); }
+.b-red   { background:rgba(245,91,110,.13); color:var(--red); }
+.empty { text-align:center; padding:36px; color:var(--muted); font-size:11px; }
+.big-ico { font-size:28px; margin-bottom:8px; }
 
-  /* TABLE */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    text-align: left; font-size: 10px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 1px;
-    padding: 8px 12px; border-bottom: 1px solid var(--border);
-  }
-  td { padding: 12px 12px; font-size: 12px; border-bottom: 1px solid rgba(42,42,58,0.5); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(91,110,245,0.03); }
+/* ─── CHANNEL GRID ─── */
+.ch-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:11px; margin-bottom:18px; }
+.ch-card {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:10px; padding:14px; cursor:pointer; transition:all .18s;
+}
+.ch-card:hover, .ch-card.sel {
+  border-color:var(--accent); background:rgba(91,110,245,.08);
+}
+.ch-name { font-size:12px; font-weight:700; margin-bottom:4px; }
+.ch-id   { font-size:10px; color:var(--muted2); }
 
-  .badge {
-    display: inline-block;
-    padding: 3px 8px; border-radius: 4px; font-size: 10px;
-  }
-  .badge-green { background: rgba(34,211,160,0.15); color: var(--green); }
-  .badge-blue  { background: rgba(91,110,245,0.15); color: var(--accent); }
-  .badge-red   { background: rgba(245,91,110,0.15); color: var(--red); }
+/* ─── MESSAGE ─── */
+.msg-area {
+  width:100%; background:var(--bg3); border:1px solid var(--border);
+  border-radius:9px; padding:13px; color:var(--text);
+  font-family:var(--font); font-size:12px; min-height:110px;
+  resize:vertical; outline:none; transition:border-color .18s;
+}
+.msg-area:focus { border-color:var(--accent); }
+.preview {
+  background:var(--bg3); border:1px solid var(--border);
+  border-left:2px solid var(--accent); border-radius:9px;
+  padding:13px; font-size:12px; line-height:1.65; white-space:pre-wrap;
+}
+.preview a { color:var(--accent); }
+.divider { height:1px; background:var(--border); margin:16px 0; }
 
-  .empty-state {
-    text-align: center; padding: 40px; color: var(--muted); font-size: 12px;
-  }
-  .empty-state .big { font-size: 32px; margin-bottom: 8px; }
+/* ─── MODAL ─── */
+.modal-wrap {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.7); z-index:400;
+  display:none; align-items:center; justify-content:center;
+  backdrop-filter:blur(5px); padding:20px;
+}
+.modal-wrap.open { display:flex; }
+.modal {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:16px; padding:28px; width:400px; max-width:100%;
+  animation:modalIn .22s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+.modal h3 { font-size:14px; font-weight:800; margin-bottom:5px; }
+.modal p  { font-size:10px; color:var(--muted2); margin-bottom:18px; }
+.modal-foot { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; }
+.form-grp  { margin-bottom:12px; }
+.form-grp label { display:block; font-size:9px; color:var(--muted2); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px; }
 
-  /* SEND MESSAGE */
-  .channel-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px; margin-bottom: 20px;
-  }
-  .channel-card {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px; cursor: pointer;
-    transition: all 0.2s;
-  }
-  .channel-card:hover, .channel-card.selected {
-    border-color: var(--accent);
-    background: rgba(91,110,245,0.08);
-  }
-  .channel-card .ch-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-  .channel-card .ch-id { font-size: 10px; color: var(--muted); }
+/* ─── CONFIRM MODAL ─── */
+.confirm-modal { max-width:340px; }
+.confirm-modal .ico-big { font-size:36px; text-align:center; margin-bottom:12px; }
 
-  .msg-area {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    min-height: 120px;
-    resize: vertical;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .msg-area:focus { border-color: var(--accent); }
+/* ─── TOAST ─── */
+.toasts { position:fixed; bottom:20px; right:20px; z-index:999; display:flex; flex-direction:column; gap:7px; }
+.toast {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:10px; padding:10px 15px; font-size:11px;
+  display:flex; align-items:center; gap:9px;
+  animation:toastIn .25s ease; min-width:230px;
+  transition:opacity .3s;
+}
+@keyframes toastIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+.toast.success { border-left:2px solid var(--green); }
+.toast.error   { border-left:2px solid var(--red); }
+.toast.info    { border-left:2px solid var(--accent); }
+.loader { width:12px; height:12px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; display:inline-block; }
+@keyframes spin { to{transform:rotate(360deg)} }
 
-  .preview-box {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 8px; padding: 14px;
-    font-size: 13px; line-height: 1.6;
-    white-space: pre-wrap;
-  }
-  .preview-link { color: var(--accent); text-decoration: underline; }
-
-  /* MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    display: none; align-items: center; justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    width: 420px;
-    max-width: 90vw;
-    animation: modalIn 0.25s ease;
-  }
-  @keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
-  .modal h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; margin-bottom: 6px; }
-  .modal p  { font-size: 11px; color: var(--muted); margin-bottom: 20px; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-  /* CONFIG */
-  .config-form { display: flex; flex-direction: column; gap: 14px; }
-  .form-group label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-
-  /* TOAST */
-  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
-  .toast {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 16px; font-size: 12px;
-    display: flex; align-items: center; gap: 10px;
-    animation: toastIn 0.3s ease;
-    min-width: 260px;
-  }
-  @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
-  .toast.success { border-left: 3px solid var(--green); }
-  .toast.error   { border-left: 3px solid var(--red); }
-  .toast.info    { border-left: 3px solid var(--accent); }
-
-  /* LOADER */
-  .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .divider { height: 1px; background: var(--border); margin: 20px 0; }
-
-  .tag { display: inline-flex; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 11px; }
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px) {
+  .burger { display:flex; }
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; padding:18px 16px 36px; }
+  .topbar { margin-top:40px; }
+  .stats { grid-template-columns:1fr 1fr; }
+  .ch-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:480px) {
+  .stats { grid-template-columns:1fr; }
+  .ch-grid { grid-template-columns:1fr; }
+  .sbar { flex-direction:column; }
+  .card { padding:14px; }
+}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<nav class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">🤖</div>
-    <h1>BOT PANEL</h1>
-    <span>Admin Dashboard</span>
-  </div>
-  <div class="nav">
-    <div class="nav-item active" onclick="goPage('dashboard')">
-      <span class="ico">📊</span> Дашборд
-      <div class="status-dot"></div>
-    </div>
-    <div class="nav-item" onclick="goPage('whitelist')">
-      <span class="ico">👥</span> Whitelist
-    </div>
-    <div class="nav-item" onclick="goPage('channels')">
-      <span class="ico">📡</span> Каналы
-    </div>
-    <div class="nav-item" onclick="goPage('send')">
-      <span class="ico">📨</span> Отправить
-    </div>
-  </div>
-</nav>
+<button class="burger" id="burger" onclick="toggleSidebar()" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- MAIN -->
-<main class="main">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div>
-      <div class="page-title" id="pageTitle">Дашборд</div>
-      <div class="page-sub" id="pageSub">Общая статистика</div>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <div>
+        <div class="logo-text">BOT PANEL</div>
+        <div class="logo-sub">Admin Dashboard</div>
+      </div>
     </div>
-    <button class="config-btn" onclick="openConfig()">⚙️ Настройки</button>
-  </div>
+    <div class="nav">
+      <div class="nav-item active" onclick="goPage('dashboard')">
+        <span class="ico">📊</span> Dashboard
+        <div class="nav-dot"></div>
+      </div>
+      <div class="nav-item" onclick="goPage('whitelist')">
+        <span class="ico">👥</span> Whitelist
+      </div>
+      <div class="nav-item" onclick="goPage('channels')">
+        <span class="ico">📡</span> Channels
+      </div>
+      <div class="nav-item" onclick="goPage('send')">
+        <span class="ico">📨</span> Send Message
+      </div>
+    </div>
+  </nav>
 
-  <!-- DASHBOARD -->
-  <div class="page active" id="page-dashboard">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">👥</div>
-        <div class="stat-label">В Whitelist</div>
-        <div class="stat-value" id="stat-wl">—</div>
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="page-title" id="pageTitle">Dashboard</div>
+          <div class="page-sub" id="pageSub">Overview & stats</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon">📡</div>
-        <div class="stat-label">Каналов</div>
-        <div class="stat-value" id="stat-ch">—</div>
-      </div>
-      <div class="stat-card" style="--accent:#22d3a0">
-        <div class="stat-icon">✅</div>
-        <div class="stat-label">Статус</div>
-        <div class="stat-value" style="font-size:14px;margin-top:14px;color:var(--green)">ONLINE</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🕐</div>
-        <div class="stat-label">Обновлено</div>
-        <div class="stat-value" style="font-size:13px;margin-top:14px" id="stat-time">—</div>
-      </div>
+      <button class="cfg-btn" onclick="openCfg()">⚙ Settings</button>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Последние в Whitelist</div>
-        <button class="btn btn-ghost btn-sm" onclick="goPage('whitelist')">Все →</button>
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-lbl">Whitelisted</div>
+          <div class="stat-val" id="s-wl">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📡</div>
+          <div class="stat-lbl">Channels</div>
+          <div class="stat-val" id="s-ch">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🟢</div>
+          <div class="stat-lbl">Status</div>
+          <div class="stat-val" style="font-size:13px;margin-top:11px;color:var(--green)">ONLINE</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🕐</div>
+          <div class="stat-lbl">Updated</div>
+          <div class="stat-val" style="font-size:12px;margin-top:11px" id="s-time">—</div>
+        </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>#</th><th>User ID</th><th>Добавлен</th></tr></thead>
-          <tbody id="dash-wl-table"><tr><td colspan="3" class="empty-state"><div class="loader"></div></td></tr></tbody>
-        </table>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Recent Whitelist</div>
+          <button class="btn btn-ghost btn-sm" onclick="goPage('whitelist')">View all →</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>User ID</th><th>Added</th></tr></thead>
+            <tbody id="d-wl"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Channels</div>
+          <button class="btn btn-ghost btn-sm" onclick="goPage('channels')">View all →</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>ID</th><th>Username</th></tr></thead>
+            <tbody id="d-ch"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Каналы</div>
-        <button class="btn btn-ghost btn-sm" onclick="goPage('channels')">Все →</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Название</th><th>ID</th><th>Username</th></tr></thead>
-          <tbody id="dash-ch-table"><tr><td colspan="4" class="empty-state"><div class="loader"></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- WHITELIST -->
-  <div class="page" id="page-whitelist">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Управление Whitelist</div>
-        <button class="btn btn-primary btn-sm" onclick="openAddUser()">➕ Добавить</button>
-      </div>
-      <div class="search-bar">
-        <input class="search-input" id="wl-search" placeholder="🔍 Поиск по ID пользователя..." oninput="filterWL()">
-        <button class="btn btn-ghost btn-sm" onclick="loadWhitelist()">↻ Обновить</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>#</th><th>User ID</th><th>Добавлен</th><th>Действия</th></tr></thead>
-          <tbody id="wl-table"></tbody>
-        </table>
+    <!-- WHITELIST -->
+    <div class="page" id="page-whitelist">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Whitelist Management</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddUser()">+ Add User</button>
+        </div>
+        <div class="sbar">
+          <input class="sinput" id="wl-search" placeholder="🔍 Search by user ID..." oninput="filterWL()">
+          <button class="btn btn-ghost btn-sm" onclick="loadWL()">↻ Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>User ID</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody id="wl-tbl"></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- CHANNELS -->
-  <div class="page" id="page-channels">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Управление каналами</div>
-        <button class="btn btn-primary btn-sm" onclick="openAddChannel()">➕ Добавить</button>
-      </div>
-      <div class="search-bar">
-        <input class="search-input" id="ch-search" placeholder="🔍 Поиск по названию или ID..." oninput="filterChannels()">
-        <button class="btn btn-ghost btn-sm" onclick="loadChannels()">↻ Обновить</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Название</th><th>Channel ID</th><th>Username</th><th>Действия</th></tr></thead>
-          <tbody id="ch-table"></tbody>
-        </table>
+    <!-- CHANNELS -->
+    <div class="page" id="page-channels">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Channel Management</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddCh()">+ Add Channel</button>
+        </div>
+        <div class="sbar">
+          <input class="sinput" id="ch-search" placeholder="🔍 Search by name or ID..." oninput="filterCH()">
+          <button class="btn btn-ghost btn-sm" onclick="loadCH()">↻ Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Channel ID</th><th>Username</th><th>Actions</th></tr></thead>
+            <tbody id="ch-tbl"></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- SEND MESSAGE -->
-  <div class="page" id="page-send">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Выберите канал</div>
-        <button class="btn btn-ghost btn-sm" onclick="loadChannels(); renderSendChannels()">↻</button>
+    <!-- SEND -->
+    <div class="page" id="page-send">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Select Channel</div>
+          <button class="btn btn-ghost btn-sm" onclick="renderSendCh()">↻</button>
+        </div>
+        <div id="send-chs" class="ch-grid"></div>
       </div>
-      <div id="send-channels" class="channel-grid"></div>
+      <div class="card" id="send-form" style="display:none">
+        <div class="card-head">
+          <div class="card-title">Message for <span id="send-ch-label" style="color:var(--accent)"></span></div>
+        </div>
+        <textarea class="msg-area" id="msg-txt" placeholder="Type your message here..." oninput="updatePreview()"></textarea>
+        <div class="divider"></div>
+        <div style="font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Preview</div>
+        <div class="preview" id="msg-preview">Write a message above...</div>
+        <div style="display:flex;gap:9px;margin-top:14px">
+          <button class="btn btn-primary" onclick="sendMsg()" id="send-btn">📨 Send to channel</button>
+          <button class="btn btn-ghost" onclick="clearSend()">Cancel</button>
+        </div>
+      </div>
     </div>
 
-    <div class="card" id="send-form-card" style="display:none">
-      <div class="card-header">
-        <div class="card-title">Сообщение для <span id="send-ch-name" style="color:var(--accent)"></span></div>
-      </div>
-      <textarea class="msg-area" id="msg-text" placeholder="Введите текст сообщения..." oninput="updatePreview()"></textarea>
-      <div class="divider"></div>
-      <div class="card-title" style="font-size:12px;margin-bottom:10px;color:var(--muted)">ПРЕДПРОСМОТР</div>
-      <div class="preview-box" id="msg-preview">Напишите сообщение выше...</div>
-      <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="btn btn-primary" onclick="sendMessage()" id="send-btn">📨 Отправить в канал</button>
-        <button class="btn btn-ghost" onclick="clearSend()">Отмена</button>
-      </div>
-    </div>
-  </div>
+  </main>
+</div>
 
-</main>
+<!-- ─── MODALS ─── -->
 
-<!-- MODAL: CONFIG -->
-<div class="modal-overlay" id="modal-config">
+<!-- SETTINGS -->
+<div class="modal-wrap" id="m-cfg">
   <div class="modal">
-    <h3>⚙️ Настройки подключения</h3>
-    <p>Укажи данные от Supabase. Они сохраняются в localStorage.</p>
-    <div class="config-form">
-      <div class="form-group">
-        <label>Supabase URL</label>
-        <input class="search-input" id="cfg-url" placeholder="https://xxx.supabase.co">
-      </div>
-      <div class="form-group">
-        <label>Supabase Anon Key</label>
-        <input class="search-input" id="cfg-key" placeholder="eyJ..." type="password">
-      </div>
-      <div class="form-group">
-        <label>Bot Token (для отправки)</label>
-        <input class="search-input" id="cfg-bot" placeholder="1234567890:AAE..." type="password">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-config')">Отмена</button>
-      <button class="btn btn-primary" onclick="saveConfig()">💾 Сохранить</button>
+    <h3>⚙ Settings</h3>
+    <p>Connection data is stored in your browser (localStorage)</p>
+    <div class="form-grp"><label>Supabase URL</label><input class="sinput" id="c-url" placeholder="https://xxx.supabase.co" style="width:100%"></div>
+    <div class="form-grp"><label>Supabase Anon Key</label><input class="sinput" id="c-key" placeholder="eyJ..." type="password" style="width:100%"></div>
+    <div class="form-grp"><label>Bot Token</label><input class="sinput" id="c-bot" placeholder="1234567890:AAE..." type="password" style="width:100%"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeM('m-cfg')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCfg()">💾 Save</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: ADD USER -->
-<div class="modal-overlay" id="modal-add-user">
+<!-- ADD USER -->
+<div class="modal-wrap" id="m-add-user">
   <div class="modal">
-    <h3>➕ Добавить в Whitelist</h3>
-    <p>Введи Telegram ID пользователя (числовой)</p>
-    <div class="form-group">
-      <label>Telegram User ID</label>
-      <input class="search-input" id="new-user-id" placeholder="123456789" type="number"
-        onkeydown="if(event.key==='Enter')addUser()">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-add-user')">Отмена</button>
-      <button class="btn btn-primary" onclick="addUser()">Добавить</button>
+    <h3>+ Add to Whitelist</h3>
+    <p>Enter the Telegram numeric user ID</p>
+    <div class="form-grp"><label>Telegram User ID</label><input class="sinput" id="n-uid" type="number" placeholder="123456789" style="width:100%" onkeydown="if(event.key==='Enter')addUser()"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeM('m-add-user')">Cancel</button>
+      <button class="btn btn-primary" onclick="addUser()">Add</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: ADD CHANNEL -->
-<div class="modal-overlay" id="modal-add-channel">
+<!-- ADD CHANNEL -->
+<div class="modal-wrap" id="m-add-ch">
   <div class="modal">
-    <h3>➕ Добавить канал</h3>
-    <p>Введи данные канала вручную (бот должен быть админом)</p>
-    <div class="config-form">
-      <div class="form-group">
-        <label>Channel ID (числовой, например -1001234567890)</label>
-        <input class="search-input" id="new-ch-id" placeholder="-1001234567890">
-      </div>
-      <div class="form-group">
-        <label>Название канала</label>
-        <input class="search-input" id="new-ch-title" placeholder="Мой канал">
-      </div>
-      <div class="form-group">
-        <label>Username (без @, необязательно)</label>
-        <input class="search-input" id="new-ch-username" placeholder="mychannel">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-add-channel')">Отмена</button>
-      <button class="btn btn-primary" onclick="addChannel()">Добавить</button>
+    <h3>+ Add Channel</h3>
+    <p>Bot must be admin in the channel before adding</p>
+    <div class="form-grp"><label>Channel ID (e.g. -1001234567890)</label><input class="sinput" id="n-chid" placeholder="-1001234567890" style="width:100%"></div>
+    <div class="form-grp"><label>Channel Name</label><input class="sinput" id="n-chname" placeholder="My Channel" style="width:100%"></div>
+    <div class="form-grp"><label>Username (without @, optional)</label><input class="sinput" id="n-chuser" placeholder="mychannel" style="width:100%"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeM('m-add-ch')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCh()">Add Channel</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast-container" id="toasts"></div>
+<!-- CONFIRM DELETE -->
+<div class="modal-wrap" id="m-confirm">
+  <div class="modal confirm-modal">
+    <div class="ico-big" id="conf-ico">🗑</div>
+    <h3 id="conf-title">Confirm deletion</h3>
+    <p id="conf-msg">This action cannot be undone.</p>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeM('m-confirm')">Cancel</button>
+      <button class="btn btn-danger" id="conf-ok" onclick="">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toasts" id="toasts"></div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────
 let CFG = {
-  url: localStorage.getItem('sb_url') || '',
-  key: localStorage.getItem('sb_key') || '',
-  bot: localStorage.getItem('tg_bot') || '',
+  url: localStorage.getItem('sb_url')||'',
+  key: localStorage.getItem('sb_key')||'',
+  bot: localStorage.getItem('tg_bot')||'',
 };
+let wlData=[], chData=[], selCh=null;
 
-let wlData = [];
-let chData = [];
-let selectedChannel = null;
-
-function openConfig() {
-  document.getElementById('cfg-url').value = CFG.url;
-  document.getElementById('cfg-key').value = CFG.key;
-  document.getElementById('cfg-bot').value = CFG.bot;
-  openModal('modal-config');
+/* ─── SIDEBAR ─── */
+function toggleSidebar(){
+  const s=document.getElementById('sidebar'),b=document.getElementById('burger'),o=document.getElementById('overlay');
+  const open=s.classList.toggle('open');
+  b.classList.toggle('open',open);
+  o.classList.toggle('open',open);
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('burger').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
 }
 
-function saveConfig() {
-  CFG.url = document.getElementById('cfg-url').value.trim();
-  CFG.key = document.getElementById('cfg-key').value.trim();
-  CFG.bot = document.getElementById('cfg-bot').value.trim();
-  localStorage.setItem('sb_url', CFG.url);
-  localStorage.setItem('sb_key', CFG.key);
-  localStorage.setItem('tg_bot', CFG.bot);
-  closeModal('modal-config');
-  toast('✅ Настройки сохранены', 'success');
+/* ─── CONFIG ─── */
+function openCfg(){
+  document.getElementById('c-url').value=CFG.url;
+  document.getElementById('c-key').value=CFG.key;
+  document.getElementById('c-bot').value=CFG.bot;
+  openM('m-cfg');
+}
+function saveCfg(){
+  CFG.url=document.getElementById('c-url').value.trim();
+  CFG.key=document.getElementById('c-key').value.trim();
+  CFG.bot=document.getElementById('c-bot').value.trim();
+  localStorage.setItem('sb_url',CFG.url);
+  localStorage.setItem('sb_key',CFG.key);
+  localStorage.setItem('tg_bot',CFG.bot);
+  closeM('m-cfg');
+  toast('Settings saved','success');
   loadAll();
 }
 
-// ── SUPABASE API ────────────────────────────────────────────────────
-async function sbFetch(path, opts = {}) {
-  if (!CFG.url || !CFG.key) {
-    toast('⚠️ Настрой подключение (кнопка ⚙️)', 'error');
-    throw new Error('no config');
-  }
-  const res = await fetch(CFG.url + '/rest/v1/' + path, {
-    headers: {
-      'apikey': CFG.key,
-      'Authorization': 'Bearer ' + CFG.key,
-      'Content-Type': 'application/json',
-      'Prefer': opts.prefer || 'return=representation',
-      ...opts.headers
-    },
-    ...opts
+/* ─── SUPABASE ─── */
+async function sb(path,opts={}){
+  if(!CFG.url||!CFG.key){toast('Configure Supabase in Settings ⚙','error');throw new Error('no-cfg');}
+  const res=await fetch(CFG.url+'/rest/v1/'+path,{
+    headers:{
+      'apikey':CFG.key,'Authorization':'Bearer '+CFG.key,
+      'Content-Type':'application/json',
+      'Prefer':opts.prefer||'return=representation'
+    },...opts
   });
-  if (!res.ok) {
-    const e = await res.json().catch(() => ({}));
-    throw new Error(e.message || res.statusText);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||res.statusText);}
+  const t=await res.text(); return t?JSON.parse(t):[];
 }
 
-// ── NAVIGATION ──────────────────────────────────────────────────────
-const pageTitles = {
-  dashboard: ['Дашборд', 'Общая статистика'],
-  whitelist:  ['Whitelist', 'Управление доступом пользователей'],
-  channels:   ['Каналы', 'Управление Telegram каналами'],
-  send:       ['Отправить сообщение', 'Выбери канал и напиши текст'],
+/* ─── NAV ─── */
+const meta={
+  dashboard:['Dashboard','Overview & stats'],
+  whitelist:['Whitelist','User access management'],
+  channels:['Channels','Telegram channel management'],
+  send:['Send Message','Select a channel and compose'],
 };
-
-function goPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item')[['dashboard','whitelist','channels','send'].indexOf(id)].classList.add('active');
-  const [t, s] = pageTitles[id];
-  document.getElementById('pageTitle').textContent = t;
-  document.getElementById('pageSub').textContent = s;
-  if (id === 'send') renderSendChannels();
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const idx={dashboard:0,whitelist:1,channels:2,send:3}[id];
+  document.querySelectorAll('.nav-item')[idx].classList.add('active');
+  document.getElementById('pageTitle').textContent=meta[id][0];
+  document.getElementById('pageSub').textContent=meta[id][1];
+  if(id==='send') renderSendCh();
+  closeSidebar();
 }
 
-// ── WHITELIST ───────────────────────────────────────────────────────
-async function loadWhitelist() {
-  try {
-    wlData = await sbFetch('whitelist?order=created_at.desc');
-    renderWL(wlData);
-    renderDashWL(wlData);
-    document.getElementById('stat-wl').textContent = wlData.length;
-  } catch(e) { if(e.message !== 'no config') toast('Ошибка WL: ' + e.message, 'error'); }
+/* ─── WHITELIST ─── */
+async function loadWL(){
+  try{
+    wlData=await sb('whitelist?order=created_at.desc');
+    renderWL(wlData); renderDashWL(wlData);
+    document.getElementById('s-wl').textContent=wlData.length;
+  }catch(e){if(e.message!=='no-cfg')toast('WL error: '+e.message,'error');}
 }
-
-function renderWL(data) {
-  const tb = document.getElementById('wl-table');
-  if (!data.length) { tb.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="big">👥</div>Список пуст</div></td></tr>'; return; }
-  tb.innerHTML = data.map((r,i) => `
+function renderWL(data){
+  const tb=document.getElementById('wl-tbl');
+  if(!data.length){tb.innerHTML='<tr><td colspan="4"><div class="empty"><div class="big-ico">👥</div>No users in whitelist</div></td></tr>';return;}
+  tb.innerHTML=data.map((r,i)=>`
     <tr>
-      <td><span class="badge badge-blue">${i+1}</span></td>
-      <td><span class="tag">🆔 ${r.user_id}</span></td>
-      <td style="color:var(--muted)">${r.created_at ? new Date(r.created_at).toLocaleString('ru') : '—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${r.user_id})">🗑 Удалить</button></td>
+      <td><span class="badge b-blue">${i+1}</span></td>
+      <td><code style="font-size:11px">${r.user_id}</code></td>
+      <td style="color:var(--muted2);font-size:10px">${r.created_at?new Date(r.created_at).toLocaleString('en'):'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="confirmDel('user',${r.user_id})">🗑 Delete</button></td>
     </tr>`).join('');
 }
-
-function renderDashWL(data) {
-  const tb = document.getElementById('dash-wl-table');
-  const top = data.slice(0,5);
-  if (!top.length) { tb.innerHTML = '<tr><td colspan="3"><div class="empty-state">Пусто</div></td></tr>'; return; }
-  tb.innerHTML = top.map((r,i) => `
+function renderDashWL(data){
+  const tb=document.getElementById('d-wl');
+  const top=data.slice(0,5);
+  if(!top.length){tb.innerHTML='<tr><td colspan="3" class="empty">Empty</td></tr>';return;}
+  tb.innerHTML=top.map((r,i)=>`
     <tr>
-      <td><span class="badge badge-blue">${i+1}</span></td>
-      <td>🆔 ${r.user_id}</td>
-      <td style="color:var(--muted)">${r.created_at ? new Date(r.created_at).toLocaleString('ru') : '—'}</td>
+      <td><span class="badge b-blue">${i+1}</span></td>
+      <td><code style="font-size:11px">${r.user_id}</code></td>
+      <td style="color:var(--muted2);font-size:10px">${r.created_at?new Date(r.created_at).toLocaleString('en'):'—'}</td>
     </tr>`).join('');
 }
-
-function filterWL() {
-  const q = document.getElementById('wl-search').value.toLowerCase();
-  renderWL(wlData.filter(r => String(r.user_id).includes(q)));
+function filterWL(){
+  const q=document.getElementById('wl-search').value.toLowerCase();
+  renderWL(wlData.filter(r=>String(r.user_id).includes(q)));
+}
+function openAddUser(){document.getElementById('n-uid').value='';openM('m-add-user');}
+async function addUser(){
+  const id=document.getElementById('n-uid').value.trim();
+  if(!id||isNaN(id)){toast('Enter a valid numeric ID','error');return;}
+  try{
+    await sb('whitelist',{method:'POST',body:JSON.stringify({user_id:parseInt(id)})});
+    closeM('m-add-user');toast('User '+id+' added','success');loadWL();
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+async function delUser(uid){
+  try{
+    await sb('whitelist?user_id=eq.'+uid,{method:'DELETE',prefer:'return=minimal'});
+    toast('User '+uid+' removed','info');loadWL();
+  }catch(e){toast('Error: '+e.message,'error');}
 }
 
-function openAddUser() {
-  document.getElementById('new-user-id').value = '';
-  openModal('modal-add-user');
+/* ─── CHANNELS ─── */
+async function loadCH(){
+  try{
+    chData=await sb('channels?order=created_at.desc');
+    renderCH(chData);renderDashCH(chData);
+    document.getElementById('s-ch').textContent=chData.length;
+  }catch(e){if(e.message!=='no-cfg')toast('Channels error: '+e.message,'error');}
 }
-
-async function addUser() {
-  const id = document.getElementById('new-user-id').value.trim();
-  if (!id || isNaN(id)) { toast('Введи корректный ID', 'error'); return; }
-  try {
-    await sbFetch('whitelist', { method: 'POST', body: JSON.stringify({ user_id: parseInt(id) }) });
-    closeModal('modal-add-user');
-    toast('✅ Пользователь ' + id + ' добавлен', 'success');
-    loadWhitelist();
-  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-async function deleteUser(uid) {
-  if (!confirm('Удалить ' + uid + ' из whitelist?')) return;
-  try {
-    await sbFetch('whitelist?user_id=eq.' + uid, { method: 'DELETE', prefer: 'return=minimal' });
-    toast('🗑 Пользователь ' + uid + ' удалён', 'info');
-    loadWhitelist();
-  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-// ── CHANNELS ────────────────────────────────────────────────────────
-async function loadChannels() {
-  try {
-    chData = await sbFetch('channels?order=created_at.desc');
-    renderChannels(chData);
-    renderDashChannels(chData);
-    document.getElementById('stat-ch').textContent = chData.length;
-  } catch(e) { if(e.message !== 'no config') toast('Ошибка каналов: ' + e.message, 'error'); }
-}
-
-function renderChannels(data) {
-  const tb = document.getElementById('ch-table');
-  if (!data.length) { tb.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="big">📡</div>Нет каналов</div></td></tr>'; return; }
-  tb.innerHTML = data.map((r,i) => `
+function renderCH(data){
+  const tb=document.getElementById('ch-tbl');
+  if(!data.length){tb.innerHTML='<tr><td colspan="5"><div class="empty"><div class="big-ico">📡</div>No channels added</div></td></tr>';return;}
+  tb.innerHTML=data.map((r,i)=>`
     <tr>
-      <td><span class="badge badge-blue">${i+1}</span></td>
-      <td><b>${r.title || '—'}</b></td>
-      <td><code style="font-size:11px;color:var(--muted)">${r.channel_id}</code></td>
-      <td>${r.username ? '<span class="badge badge-green">@' + r.username + '</span>' : '<span class="badge">—</span>'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteChannel('${r.channel_id}')">🗑 Удалить</button></td>
+      <td><span class="badge b-blue">${i+1}</span></td>
+      <td><b>${r.title||'—'}</b></td>
+      <td><code style="font-size:10px;color:var(--muted2)">${r.channel_id}</code></td>
+      <td>${r.username?'<span class="badge b-green">@'+r.username+'</span>':'<span style="color:var(--muted)">—</span>'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="confirmDel('channel','${r.channel_id}')">🗑 Delete</button></td>
     </tr>`).join('');
 }
-
-function renderDashChannels(data) {
-  const tb = document.getElementById('dash-ch-table');
-  const top = data.slice(0,5);
-  if (!top.length) { tb.innerHTML = '<tr><td colspan="4"><div class="empty-state">Пусто</div></td></tr>'; return; }
-  tb.innerHTML = top.map((r,i) => `
+function renderDashCH(data){
+  const tb=document.getElementById('d-ch');
+  const top=data.slice(0,5);
+  if(!top.length){tb.innerHTML='<tr><td colspan="4" class="empty">Empty</td></tr>';return;}
+  tb.innerHTML=top.map((r,i)=>`
     <tr>
-      <td><span class="badge badge-blue">${i+1}</span></td>
-      <td>${r.title || '—'}</td>
-      <td><code style="font-size:11px;color:var(--muted)">${r.channel_id}</code></td>
-      <td>${r.username ? '@'+r.username : '—'}</td>
+      <td><span class="badge b-blue">${i+1}</span></td>
+      <td>${r.title||'—'}</td>
+      <td><code style="font-size:10px;color:var(--muted2)">${r.channel_id}</code></td>
+      <td>${r.username?'@'+r.username:'—'}</td>
     </tr>`).join('');
 }
-
-function filterChannels() {
-  const q = document.getElementById('ch-search').value.toLowerCase();
-  renderChannels(chData.filter(r =>
-    (r.title||'').toLowerCase().includes(q) ||
-    String(r.channel_id).includes(q) ||
-    (r.username||'').toLowerCase().includes(q)
-  ));
+function filterCH(){
+  const q=document.getElementById('ch-search').value.toLowerCase();
+  renderCH(chData.filter(r=>(r.title||'').toLowerCase().includes(q)||String(r.channel_id).includes(q)||(r.username||'').toLowerCase().includes(q)));
+}
+function openAddCh(){
+  ['n-chid','n-chname','n-chuser'].forEach(id=>document.getElementById(id).value='');
+  openM('m-add-ch');
+}
+async function addCh(){
+  const id=document.getElementById('n-chid').value.trim();
+  const title=document.getElementById('n-chname').value.trim();
+  const uname=document.getElementById('n-chuser').value.trim().replace('@','');
+  if(!id||!title){toast('Fill in ID and name','error');return;}
+  try{
+    await sb('channels',{method:'POST',body:JSON.stringify({channel_id:id,title,username:uname})});
+    closeM('m-add-ch');toast('Channel added','success');loadCH();
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+async function delCh(cid){
+  try{
+    await sb('channels?channel_id=eq.'+encodeURIComponent(cid),{method:'DELETE',prefer:'return=minimal'});
+    toast('Channel removed','info');loadCH();
+  }catch(e){toast('Error: '+e.message,'error');}
 }
 
-function openAddChannel() {
-  ['new-ch-id','new-ch-title','new-ch-username'].forEach(id => document.getElementById(id).value = '');
-  openModal('modal-add-channel');
+/* ─── CONFIRM DELETE ─── */
+function confirmDel(type,id){
+  const isUser=type==='user';
+  document.getElementById('conf-ico').textContent=isUser?'👤':'📡';
+  document.getElementById('conf-title').textContent=isUser?'Remove user '+id+'?':'Remove channel?';
+  document.getElementById('conf-msg').textContent=isUser
+    ?'User '+id+' will lose access to the bot.'
+    :'Channel '+id+' will be removed from the panel.';
+  const btn=document.getElementById('conf-ok');
+  btn.onclick=()=>{closeM('m-confirm');isUser?delUser(id):delCh(id);};
+  openM('m-confirm');
 }
 
-async function addChannel() {
-  const id    = document.getElementById('new-ch-id').value.trim();
-  const title = document.getElementById('new-ch-title').value.trim();
-  const uname = document.getElementById('new-ch-username').value.trim().replace('@','');
-  if (!id || !title) { toast('Заполни ID и название', 'error'); return; }
-  try {
-    await sbFetch('channels', { method: 'POST', body: JSON.stringify({ channel_id: id, title, username: uname }) });
-    closeModal('modal-add-channel');
-    toast('✅ Канал добавлен', 'success');
-    loadChannels();
-  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-async function deleteChannel(cid) {
-  if (!confirm('Удалить канал ' + cid + '?')) return;
-  try {
-    await sbFetch('channels?channel_id=eq.' + encodeURIComponent(cid), { method: 'DELETE', prefer: 'return=minimal' });
-    toast('🗑 Канал удалён', 'info');
-    loadChannels();
-  } catch(e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-// ── SEND MESSAGE ────────────────────────────────────────────────────
-function renderSendChannels() {
-  const el = document.getElementById('send-channels');
-  if (!chData.length) {
-    el.innerHTML = '<div class="empty-state"><div class="big">📡</div>Нет каналов. Добавь их во вкладке «Каналы».</div>';
-    return;
+/* ─── SEND ─── */
+function renderSendCh(){
+  const el=document.getElementById('send-chs');
+  if(!chData.length){
+    el.innerHTML='<div class="empty" style="width:100%"><div class="big-ico">📡</div>No channels. Add them in the Channels tab.</div>';return;
   }
-  el.innerHTML = chData.map(ch => `
-    <div class="channel-card ${selectedChannel?.channel_id === ch.channel_id ? 'selected':''}"
-         onclick="selectChannel(${JSON.stringify(ch).replace(/"/g,'&quot;')})">
-      <div class="ch-name">📡 ${ch.title || 'Без названия'}</div>
-      <div class="ch-id">${ch.username ? '@'+ch.username : ch.channel_id}</div>
+  el.innerHTML=chData.map(ch=>`
+    <div class="ch-card ${selCh&&selCh.channel_id===ch.channel_id?'sel':''}"
+         onclick='selectCh(${JSON.stringify(ch).replace(/'/g,"&#39;")})'>
+      <div class="ch-name">📡 ${ch.title||'Untitled'}</div>
+      <div class="ch-id">${ch.username?'@'+ch.username:ch.channel_id}</div>
     </div>`).join('');
 }
-
-function selectChannel(ch) {
-  selectedChannel = ch;
-  renderSendChannels();
-  const name = ch.username ? '@'+ch.username : ch.title;
-  document.getElementById('send-ch-name').textContent = name;
-  document.getElementById('send-form-card').style.display = 'block';
+function selectCh(ch){
+  selCh=ch;renderSendCh();
+  const name=ch.username?'@'+ch.username:ch.title;
+  document.getElementById('send-ch-label').textContent=name;
+  document.getElementById('send-form').style.display='block';
   updatePreview();
 }
-
-function updatePreview() {
-  const text = document.getElementById('msg-text').value;
-  const ch = selectedChannel;
-  if (!ch) return;
-  const name = ch.username ? '@'+ch.username : ch.title;
-  const link = ch.username ? 'https://t.me/'+ch.username : '';
-  const sub = link
-    ? `\n\n<a href="${link}" class="preview-link">📢 Подписаться на ${name}</a>`
-    : `\n\n📢 Подписаться на ${name}`;
-  document.getElementById('msg-preview').innerHTML = (text || '') + sub;
+function updatePreview(){
+  const txt=document.getElementById('msg-txt').value;
+  if(!selCh)return;
+  const name=selCh.username?'@'+selCh.username:selCh.title;
+  const link=selCh.username?'https://t.me/'+selCh.username:'';
+  const sub=link
+    ?`\n\n<a href="${link}">📢 Subscribe to ${name}</a>`
+    :`\n\n📢 Subscribe to ${name}`;
+  document.getElementById('msg-preview').innerHTML=(txt||'')+sub;
 }
-
-async function sendMessage() {
-  const text = document.getElementById('msg-text').value.trim();
-  if (!text) { toast('Напиши сообщение', 'error'); return; }
-  if (!selectedChannel) { toast('Выбери канал', 'error'); return; }
-  if (!CFG.bot) { toast('Укажи Bot Token в настройках', 'error'); return; }
-
-  const ch = selectedChannel;
-  const name = ch.username ? '@'+ch.username : ch.title;
-  const link = ch.username ? 'https://t.me/'+ch.username : '';
-  const sub = link
-    ? `\n\n<a href="${link}">📢 Подписаться на ${name}</a>`
-    : `\n\n📢 Подписаться на ${name}`;
-  const finalText = text + sub;
-
-  const btn = document.getElementById('send-btn');
-  btn.innerHTML = '<div class="loader"></div> Отправка...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${CFG.bot}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: ch.channel_id,
-        text: finalText,
-        parse_mode: 'HTML',
-      })
+async function sendMsg(){
+  const txt=document.getElementById('msg-txt').value.trim();
+  if(!txt){toast('Write a message first','error');return;}
+  if(!selCh){toast('Select a channel','error');return;}
+  if(!CFG.bot){toast('Set Bot Token in Settings ⚙','error');return;}
+  const name=selCh.username?'@'+selCh.username:selCh.title;
+  const link=selCh.username?'https://t.me/'+selCh.username:'';
+  const sub=link?`\n\n<a href="${link}">📢 Subscribe to ${name}</a>`:`\n\n📢 Subscribe to ${name}`;
+  const final=txt+sub;
+  const btn=document.getElementById('send-btn');
+  btn.innerHTML='<div class="loader"></div> Sending...';btn.disabled=true;
+  try{
+    const res=await fetch(`https://api.telegram.org/bot${CFG.bot}/sendMessage`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:selCh.channel_id,text:final,parse_mode:'HTML'})
     });
-    const data = await res.json();
-    if (data.ok) {
-      toast('✅ Сообщение отправлено в ' + name, 'success');
-      clearSend();
-    } else {
-      toast('Ошибка TG: ' + data.description, 'error');
-    }
-  } catch(e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.innerHTML = '📨 Отправить в канал';
-    btn.disabled = false;
-  }
+    const data=await res.json();
+    if(data.ok){toast('✅ Sent to '+name,'success');clearSend();}
+    else toast('TG error: '+data.description,'error');
+  }catch(e){toast('Error: '+e.message,'error');}
+  finally{btn.innerHTML='📨 Send to channel';btn.disabled=false;}
+}
+function clearSend(){
+  selCh=null;
+  document.getElementById('msg-txt').value='';
+  document.getElementById('msg-preview').innerHTML='Write a message above...';
+  document.getElementById('send-form').style.display='none';
+  renderSendCh();
 }
 
-function clearSend() {
-  selectedChannel = null;
-  document.getElementById('msg-text').value = '';
-  document.getElementById('msg-preview').innerHTML = 'Напишите сообщение выше...';
-  document.getElementById('send-form-card').style.display = 'none';
-  renderSendChannels();
-}
-
-// ── MODAL ───────────────────────────────────────────────────────────
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if(e.target === el) el.classList.remove('open'); });
+/* ─── MODAL ─── */
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-wrap').forEach(el=>{
+  el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});
 });
 
-// ── TOAST ────────────────────────────────────────────────────────────
-function toast(msg, type='info') {
-  const c = document.getElementById('toasts');
-  const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => t.style.opacity = '0', 2500);
-  setTimeout(() => t.remove(), 3000);
+/* ─── TOAST ─── */
+function toast(msg,type='info'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast '+type; t.textContent=msg; c.appendChild(t);
+  setTimeout(()=>t.style.opacity='0',2600);
+  setTimeout(()=>t.remove(),3100);
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────
-async function loadAll() {
-  document.getElementById('stat-time').textContent = new Date().toLocaleTimeString('ru');
-  await Promise.all([loadWhitelist(), loadChannels()]);
+/* ─── INIT ─── */
+async function loadAll(){
+  document.getElementById('s-time').textContent=new Date().toLocaleTimeString('en');
+  await Promise.all([loadWL(),loadCH()]);
 }
-
-if (!CFG.url || !CFG.key) {
-  setTimeout(() => {
-    toast('⚙️ Настрой подключение к Supabase!', 'info');
-    openConfig();
-  }, 500);
-} else {
-  loadAll();
-}
+if(!CFG.url||!CFG.key){
+  setTimeout(()=>{toast('Configure Supabase connection in Settings ⚙','info');openCfg();},500);
+} else { loadAll(); }
 </script>
 </body>
 </html>
