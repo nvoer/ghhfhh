@@ -88,6 +88,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .sinput{flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-family:var(--font);font-size:11px;outline:none;transition:border-color .18s;}
 .sinput:focus{border-color:var(--accent);}
 .sinput::placeholder{color:var(--muted);}
+.sinput:-webkit-autofill,.sinput:-webkit-autofill:hover,.sinput:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--bg3) inset!important;-webkit-text-fill-color:var(--text)!important;caret-color:var(--text);border-color:var(--border)!important;}
 
 /* BUTTONS */
 .btn{padding:8px 15px;border-radius:8px;border:none;font-family:var(--font);font-size:11px;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
@@ -106,13 +107,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 table{width:100%;border-collapse:collapse;min-width:420px;}
 th{text-align:left;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 10px;border-bottom:1px solid var(--border);font-weight:500;white-space:nowrap;}
 td{padding:10px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(91,110,245,.03);}
+tr:last-child td{border-bottom:none;} tr.no-hover:hover td{background:transparent!important;cursor:default;}
+tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-row:hover td{background:transparent!important;}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:600;}
 .b-blue{background:rgba(91,110,245,.15);color:#8b9ef7;}
 .b-green{background:rgba(34,211,160,.13);color:var(--green);}
 .b-yellow{background:rgba(245,197,91,.13);color:var(--yellow);}
-.empty{text-align:center;padding:36px;color:var(--muted);font-size:11px;}
+.empty{text-align:center;padding:36px;color:var(--muted);font-size:11px;pointer-events:none;user-select:none;}
 .big-ico{margin-bottom:8px;}
 
 /* LOADER ROW */
@@ -277,7 +278,7 @@ tr:hover td{background:rgba(91,110,245,.03);}
           </button>
         </div>
         <div class="sbar">
-          <input class="sinput" id="wl-search" placeholder="Search by user ID..." oninput="filterWL()">
+          <input class="sinput" id="wl-search" placeholder="Search by user ID..." autocomplete="off" oninput="filterWL()">
           <button class="btn btn-ghost btn-sm" onclick="loadWL()">↻ Refresh</button>
         </div>
         <div class="tbl-wrap">
@@ -298,7 +299,7 @@ tr:hover td{background:rgba(91,110,245,.03);}
           </button>
         </div>
         <div class="sbar">
-          <input class="sinput" id="ch-search" placeholder="Search by name or ID..." oninput="filterCH()">
+          <input class="sinput" id="ch-search" placeholder="Search by name or ID..." autocomplete="off" oninput="filterCH()">
           <button class="btn btn-ghost btn-sm" onclick="loadCH()">↻ Refresh</button>
         </div>
         <div class="tbl-wrap">
