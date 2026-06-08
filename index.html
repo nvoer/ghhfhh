@@ -9,14 +9,14 @@
 :root {
   --bg:#0a0a0f; --bg2:#0f0f18; --bg3:#16161f; --bg4:#1c1c28;
   --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
-  --accent:#5b6ef5; --accent2:#7c5cf5;
+  --accent:#8a2be2; --accent2:#4b0082;
   --green:#22d3a0; --red:#f55b6e; --yellow:#f5c55b;
   --text:#e8e8f2; --muted:#55556a; --muted2:#888899;
   --font:'JetBrains Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(91,110,245,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,245,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(138,43,226,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(138,43,226,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 
 /* LAYOUT */
 .layout{display:flex;min-height:100vh;position:relative;z-index:1;}
@@ -43,7 +43,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:500;color:var(--muted2);border:1px solid transparent;transition:all .18s;user-select:none;}
 .nav-item:hover{background:var(--bg3);color:var(--text);}
-.nav-item.active{background:rgba(91,110,245,.13);color:var(--accent);border-color:rgba(91,110,245,.2);}
+.nav-item.active{background:rgba(138,43,226,.13);color:var(--accent);border-color:rgba(138,43,226,.2);}
 .nav-item svg{flex-shrink:0;}
 .nav-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-left:auto;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -76,7 +76,20 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
 .stat-lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;}
 .stat-val{font-size:26px;font-weight:800;margin-top:7px;line-height:1;}
-.stat-icon{position:absolute;right:14px;top:16px;opacity:.18;}
+.stat-icon{position:absolute;right:14px;top:16px;opacity:.18;transition:all .3s ease;}
+
+/* АНИМАЦИЯ ПУЛЬСА ДЛЯ ИКОНКИ СТАТУСА */
+.pulse-glow {
+  animation: heartBeat 1.5s ease-in-out infinite;
+  opacity: 0.8 !important;
+}
+@keyframes heartBeat {
+  0% { transform: scale(1); filter: drop-shadow(0 0 0px var(--green)); }
+  14% { transform: scale(1.12); filter: drop-shadow(0 0 4px var(--green)); }
+  28% { transform: scale(1); filter: drop-shadow(0 0 0px var(--green)); }
+  42% { transform: scale(1.12); filter: drop-shadow(0 0 4px var(--green)); }
+  70% { transform: scale(1); filter: drop-shadow(0 0 0px var(--green)); }
+}
 
 /* CARD */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:18px;}
@@ -93,13 +106,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 /* BUTTONS */
 .btn{padding:8px 15px;border-radius:8px;border:none;font-family:var(--font);font-size:11px;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
 .btn-primary{background:var(--accent);color:#fff;}
-.btn-primary:hover{background:#4a5de0;transform:translateY(-1px);}
+.btn-primary:hover{background:#731bc4;transform:translateY(-1px);}
 .btn-danger{background:rgba(245,91,110,.12);color:var(--red);border:1px solid rgba(245,91,110,.25);}
 .btn-danger:hover{background:rgba(245,91,110,.22);}
 .btn-ghost{background:var(--bg3);color:var(--muted2);border:1px solid var(--border);}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 .btn-copy{background:transparent;color:var(--muted);border:none;padding:3px 6px;border-radius:5px;cursor:pointer;font-family:var(--font);font-size:10px;transition:all .15s;}
-.btn-copy:hover{color:var(--accent);background:rgba(91,110,245,.1);}
+.btn-copy:hover{color:var(--accent);background:rgba(138,43,226,.1);}
 .btn-sm{padding:5px 11px;font-size:10px;}
 
 /* TABLE */
@@ -108,9 +121,9 @@ table{width:100%;border-collapse:collapse;min-width:420px;}
 th{text-align:left;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 10px;border-bottom:1px solid var(--border);font-weight:500;white-space:nowrap;}
 td{padding:10px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
 tr:last-child td{border-bottom:none;} tr.no-hover:hover td{background:transparent!important;cursor:default;}
-tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-row:hover td{background:transparent!important;}
+tr:hover td{background:rgba(138,43,226,.03);} tr:has(.empty):hover td, .loader-row:hover td{background:transparent!important;}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:600;}
-.b-blue{background:rgba(91,110,245,.15);color:#8b9ef7;}
+.b-blue{background:rgba(138,43,226,.15);color:#b172ff;}
 .b-green{background:rgba(34,211,160,.13);color:var(--green);}
 .b-yellow{background:rgba(245,197,91,.13);color:var(--yellow);}
 .empty{text-align:center;padding:36px;color:var(--muted);font-size:11px;pointer-events:none;user-select:none;}
@@ -125,7 +138,7 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
 /* CHANNEL GRID */
 .ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:11px;margin-bottom:18px;}
 .ch-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .18s;}
-.ch-card:hover,.ch-card.sel{border-color:var(--accent);background:rgba(91,110,245,.08);}
+.ch-card:hover,.ch-card.sel{border-color:var(--accent);background:rgba(138,43,226,.08);}
 .ch-name{font-size:12px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
 .ch-id{font-size:10px;color:var(--muted2);padding-left:20px;}
 
@@ -221,7 +234,6 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
       </button>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="stats">
         <div class="stat-card">
@@ -234,11 +246,15 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
           <div class="stat-lbl">Channels</div>
           <div class="stat-val" id="s-ch">—</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-          <div class="stat-lbl">Bot Status</div>
-          <div class="stat-val" style="font-size:13px;margin-top:11px;color:var(--green)">ONLINE</div>
+        
+        <div class="stat-card" style="cursor:pointer;" onclick="checkBotStatus()" title="Click to force re-check">
+          <div class="stat-icon" id="bot-status-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-lbl" id="bot-status-title">Bot Status</div>
+          <div class="stat-val" id="bot-status-val" style="font-size:13px;margin-top:11px;color:var(--muted2)">CHECKING...</div>
         </div>
+        
         <div class="stat-card">
           <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
           <div class="stat-lbl">Last Refresh</div>
@@ -267,7 +283,6 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
       </div>
     </div>
 
-    <!-- WHITELIST -->
     <div class="page" id="page-whitelist">
       <div class="card">
         <div class="card-head">
@@ -288,7 +303,6 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
       </div>
     </div>
 
-    <!-- CHANNELS -->
     <div class="page" id="page-channels">
       <div class="card">
         <div class="card-head">
@@ -309,7 +323,6 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
       </div>
     </div>
 
-    <!-- SEND -->
     <div class="page" id="page-send">
       <div class="card">
         <div class="card-head">
@@ -339,7 +352,6 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
   </main>
 </div>
 
-<!-- MODALS -->
 <div class="modal-wrap" id="m-cfg">
   <div class="modal">
     <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg> Settings</h3>
@@ -404,7 +416,7 @@ let wlData=[],chData=[],selCh=null;
 function toggleSidebar(){
   const s=document.getElementById('sidebar'),b=document.getElementById('burger'),o=document.getElementById('overlay');
   if(s.classList.contains('open')){closeSidebar();}
-  else{s.classList.remove('hidden');s.classList.add('open');b.classList.add('open');o.classList.add('open');}
+  else{s.classList.remove('hidden');s.classList.add('open');b.classList.add('open');o.classList.open();}
 }
 function closeSidebar(){
   const s=document.getElementById('sidebar'),b=document.getElementById('burger'),o=document.getElementById('overlay');
@@ -456,7 +468,6 @@ function goPage(id){
   document.getElementById('pageTitle').textContent=meta[id][0];
   document.getElementById('pageSub').textContent=meta[id][1];
   if(id==='send')renderSendCh();
-  // only close on mobile
   if(window.innerWidth<=768)closeSidebar();
 }
 
@@ -465,6 +476,47 @@ function copyText(text){
   navigator.clipboard.writeText(text).then(()=>toast('Copied!','success')).catch(()=>{
     const el=document.createElement('textarea');el.value=text;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Copied!','success');
   });
+}
+
+/* ── РЕАЛЬНЫЙ СТАТУС БОТА ИЗ TELEGRAM API ── */
+async function checkBotStatus() {
+  const statusVal = document.getElementById('bot-status-val');
+  const statusIcon = document.getElementById('bot-status-icon');
+  const statusTitle = document.getElementById('bot-status-title');
+  
+  if (!CFG.bot) {
+    statusVal.textContent = 'NO TOKEN';
+    statusVal.style.color = 'var(--yellow)';
+    statusIcon.style.color = 'var(--yellow)';
+    statusIcon.classList.remove('pulse-glow');
+    statusTitle.textContent = 'Bot Status';
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${CFG.bot}/getMe`);
+    const data = await response.json();
+
+    if (data.ok && data.result) {
+      // Бот активен и ответил корректно
+      statusVal.textContent = 'ONLINE';
+      statusVal.style.color = 'var(--green)';
+      statusIcon.style.color = 'var(--green)';
+      statusIcon.classList.add('pulse-glow');
+      // Выводим юзернейм бота в подпись
+      statusTitle.textContent = `@${data.result.username}`;
+    } else {
+      // Токен не подошел
+      throw new Error('invalid-token');
+    }
+  } catch (error) {
+    // Ошибка сети или неверный токен
+    statusVal.textContent = 'OFFLINE';
+    statusVal.style.color = 'var(--red)';
+    statusIcon.style.color = 'var(--red)';
+    statusIcon.classList.remove('pulse-glow');
+    statusTitle.textContent = 'Bot Status';
+  }
 }
 
 /* ── WHITELIST ── */
@@ -598,7 +650,6 @@ function updatePreview(){
   const txt=document.getElementById('msg-txt').value;
   if(!selCh)return;
   const name=selCh.username?'@'+selCh.username:selCh.title;
-  // link: use t.me/username if available, otherwise t.me/c/id for private channels
   const rawId=String(selCh.channel_id).replace('-100','');
   const link=selCh.username?'https://t.me/'+selCh.username:'https://t.me/c/'+rawId;
   document.getElementById('msg-preview').innerHTML=(txt||'')+`\n\n<a href="${link}">📢 Subscribe to ${name}</a>`;
@@ -645,11 +696,15 @@ function toast(msg,type='info'){
 /* ── INIT ── */
 async function loadAll(){
   document.getElementById('s-time').textContent=new Date().toLocaleTimeString('en');
-  await Promise.all([loadWL(),loadCH()]);
+  // Запускаем параллельно загрузку базы и проверку токена
+  await Promise.all([loadWL(), loadCH(), checkBotStatus()]);
 }
 initSidebar();
 if(!CFG.url||!CFG.key){setTimeout(()=>{toast('Configure Supabase in Settings','info');openCfg();},500);}
 else{loadAll();}
+
+// Автоматическое обновление статуса раз в 30 секунд
+setInterval(checkBotStatus, 30000);
 </script>
 </body>
 </html>
