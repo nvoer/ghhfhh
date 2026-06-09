@@ -6,54 +6,47 @@
 <title>Bot Admin Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0a0a0f; --bg2:#0f0f18; --bg3:#16161f; --bg4:#1c1c28;
-  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
-  --accent:#5b6ef5; --accent2:#7c5cf5;
-  --green:#22d3a0; --red:#f55b6e; --yellow:#f5c55b;
-  --text:#e8e8f2; --muted:#55556a; --muted2:#888899;
+:root{
+  --bg:#07050f;--bg2:#0d0818;--bg3:#130f1f;--bg4:#1a1428;
+  --border:rgba(139,92,246,.12);--border2:rgba(139,92,246,.22);
+  --accent:#8b5cf6;--accent2:#a855f7;
+  --green:#a78bfa;--red:#f55b6e;--yellow:#f5c55b;
+  --text:#ede8ff;--muted:#4a3d6a;--muted2:#9980cc;
   --font:'JetBrains Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(91,110,245,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,245,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;} body{overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(139,92,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 
-/* LAYOUT */
-.layout{display:flex;min-height:100vh;position:relative;z-index:1;}
+.layout{display:flex;min-height:100vh;position:relative;z-index:1;overflow-x:hidden;}
 
-/* OVERLAY */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:195;}
-.overlay.open{display:block;}
+/* OVERLAY — за сайдбаром */
 
-/* SIDEBAR */
-.sidebar{
-  width:224px;flex-shrink:0;background:var(--bg2);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  position:fixed;top:0;left:0;bottom:0;
-  z-index:200;transition:transform .25s cubic-bezier(.4,0,.2,1);
-}
-.sidebar.hidden{transform:translateX(-100%);}
 
-.logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;}
-.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.logo-text{font-size:13px;font-weight:800;letter-spacing:.5px;}
+/* SIDEBAR — всегда выше оверлея */
+.sidebar{width:224px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:transform .25s cubic-bezier(.4,0,.2,1);will-change:transform;}
+.sidebar.hidden{transform:translateX(-100%);border-right-color:transparent;box-shadow:none;}
+
+.logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#6d28d9,#a855f7);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-text{font-size:12px;font-weight:800;letter-spacing:.5px;flex:1;}
 .logo-sub{font-size:9px;color:var(--muted2);margin-top:1px;}
 
-.nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px;}
+/* Кнопка закрытия ВНУТРИ сайдбара */
+.close-btn{display:none;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:var(--muted2);width:28px;height:28px;border-radius:7px;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .18s;}
+.close-btn:hover{background:rgba(139,92,246,.25);color:var(--text);}
+
+.nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:3px;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:500;color:var(--muted2);border:1px solid transparent;transition:all .18s;user-select:none;}
 .nav-item:hover{background:var(--bg3);color:var(--text);}
-.nav-item.active{background:rgba(91,110,245,.13);color:var(--accent);border-color:rgba(91,110,245,.2);}
+.nav-item.active{background:rgba(139,92,246,.15);color:var(--accent);border-color:rgba(139,92,246,.3);}
 .nav-item svg{flex-shrink:0;}
-.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-left:auto;animation:pulse 2s infinite;}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;box-shadow:0 0 8px #a78bfa;margin-left:auto;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* BURGER */
-.burger{display:none;position:fixed;top:13px;left:13px;z-index:201;width:38px;height:38px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:5px;}
-.burger span{display:block;width:16px;height:1.5px;background:var(--text);border-radius:2px;transition:all .25s;}
-.burger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
-.burger.open span:nth-child(2){opacity:0;}
-.burger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+/* HAMBURGER — снаружи, только мобиле */
+.hamburger{display:none;position:fixed;top:13px;left:13px;z-index:201;width:38px;height:38px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:5px;}
+.hamburger span{display:block;width:16px;height:1.5px;background:var(--text);border-radius:2px;transition:all .25s;}
 
 /* MAIN */
 .main{margin-left:224px;flex:1;padding:28px 28px 40px;min-height:100vh;}
@@ -63,7 +56,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .page-title{font-size:18px;font-weight:800;}
 .page-sub{font-size:10px;color:var(--muted2);margin-top:2px;}
 .cfg-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);padding:7px 14px;border-radius:8px;font-family:var(--font);font-size:10px;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:7px;}
-.cfg-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cfg-btn:hover{border-color:#a855f7;color:#a855f7;}
 
 /* PAGES */
 .page{display:none;animation:fadeUp .28s ease;}
@@ -73,10 +66,10 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 /* STATS */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:18px 16px;position:relative;overflow:hidden;}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
-.stat-lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;max-width:85%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,#8b5cf6,#d946ef);}
+.stat-lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:85%;}
 .stat-val{font-size:26px;font-weight:800;margin-top:7px;line-height:1;}
-.stat-icon{position:absolute;right:14px;top:16px;opacity:.18;}
+.stat-icon{position:absolute;right:14px;top:16px;opacity:.15;}
 
 /* CARD */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:18px;}
@@ -85,38 +78,35 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 /* SEARCH */
 .sbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.sinput{flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-family:var(--font);font-size:11px;outline:none;transition:border-color .18s;}
-.sinput:focus{border-color:var(--accent);}
+.sinput{flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-family:var(--font);font-size:11px;outline:none;transition:all .18s;}
+.sinput:focus{border-color:#a855f7;box-shadow:0 0 0 2px rgba(168,85,247,.15);}
 .sinput::placeholder{color:var(--muted);}
 .sinput:-webkit-autofill,.sinput:-webkit-autofill:hover,.sinput:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--bg3) inset!important;-webkit-text-fill-color:var(--text)!important;caret-color:var(--text);border-color:var(--border)!important;}
 
 /* BUTTONS */
 .btn{padding:8px 15px;border-radius:8px;border:none;font-family:var(--font);font-size:11px;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
 .btn-primary{background:var(--accent);color:#fff;}
-.btn-primary:hover{background:#4a5de0;transform:translateY(-1px);}
+.btn-primary:hover{background:#7c3aed;transform:translateY(-1px);}
 .btn-danger{background:rgba(245,91,110,.12);color:var(--red);border:1px solid rgba(245,91,110,.25);}
 .btn-danger:hover{background:rgba(245,91,110,.22);}
 .btn-ghost{background:var(--bg3);color:var(--muted2);border:1px solid var(--border);}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-ghost:hover{border-color:#a855f7;color:#a855f7;}
 .btn-copy{background:transparent;color:var(--muted);border:none;padding:3px 6px;border-radius:5px;cursor:pointer;font-family:var(--font);font-size:10px;transition:all .15s;}
-.btn-copy:hover{color:var(--accent);background:rgba(91,110,245,.1);}
+.btn-copy:hover{color:#a855f7;background:rgba(139,92,246,.12);}
 .btn-sm{padding:5px 11px;font-size:10px;}
 
 /* TABLE */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;min-width:420px;}
-th{text-align:left;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 10px;border-bottom:1px solid var(--border);font-weight:500;white-space:nowrap;}
-td{padding:10px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
-tr:last-child td{border-bottom:none;} tr.no-hover:hover td{background:transparent!important;cursor:default;}
-tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-row:hover td{background:transparent!important;}
+th{text-align:left;font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:6px 10px;border-bottom:1px solid var(--border);font-weight:500;white-space:nowrap;}
+td{padding:10px 10px;font-size:11px;border-bottom:1px solid rgba(139,92,246,.05);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:not(.no-hover):hover td{background:rgba(139,92,246,.05);}
+tr.no-hover{cursor:default;}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:600;}
-.b-blue{background:rgba(91,110,245,.15);color:#8b9ef7;}
-.b-green{background:rgba(34,211,160,.13);color:var(--green);}
-.b-yellow{background:rgba(245,197,91,.13);color:var(--yellow);}
+.b-blue{background:rgba(139,92,246,.18);color:#c4b5fd;}
+.b-green{background:rgba(167,139,250,.15);color:#c4b5fd;}
 .empty{text-align:center;padding:36px;color:var(--muted);font-size:11px;pointer-events:none;user-select:none;}
-.big-ico{margin-bottom:8px;}
-
-/* LOADER ROW */
 .loader-row td{text-align:center;padding:32px;}
 .spin{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;display:inline-block;}
 .spin-sm{width:12px;height:12px;border-width:1.5px;}
@@ -125,19 +115,19 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
 /* CHANNEL GRID */
 .ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:11px;margin-bottom:18px;}
 .ch-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .18s;}
-.ch-card:hover,.ch-card.sel{border-color:var(--accent);background:rgba(91,110,245,.08);}
+.ch-card:hover,.ch-card.sel{border-color:#a855f7;background:rgba(139,92,246,.1);}
 .ch-name{font-size:12px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
 .ch-id{font-size:10px;color:var(--muted2);padding-left:20px;}
 
 /* MESSAGE */
-.msg-area{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px;color:var(--text);font-family:var(--font);font-size:12px;min-height:110px;resize:vertical;outline:none;transition:border-color .18s;}
-.msg-area:focus{border-color:var(--accent);}
-.preview{background:var(--bg3);border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:9px;padding:13px;font-size:12px;line-height:1.65;white-space:pre-wrap;}
-.preview a{color:var(--accent);}
+.msg-area{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px;color:var(--text);font-family:var(--font);font-size:12px;min-height:110px;resize:vertical;outline:none;transition:all .18s;}
+.msg-area:focus{border-color:#a855f7;box-shadow:0 0 0 2px rgba(168,85,247,.1);}
+.preview{background:var(--bg3);border:1px solid var(--border);border-left:2px solid #8b5cf6;border-radius:9px;padding:13px;font-size:12px;line-height:1.65;white-space:pre-wrap;}
+.preview a{color:#c084fc;}
 .divider{height:1px;background:var(--border);margin:16px 0;}
 
 /* MODAL */
-.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px);padding:20px;}
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:20px;}
 .modal-wrap.open{display:flex;}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px;width:400px;max-width:100%;animation:modalIn .22s ease;}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
@@ -151,13 +141,14 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
 .toasts{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:7px;}
 .toast{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 15px;font-size:11px;display:flex;align-items:center;gap:9px;animation:toastIn .25s ease;min-width:230px;transition:opacity .3s;}
 @keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
-.toast.success{border-left:2px solid var(--green);}
+.toast.success{border-left:2px solid #a78bfa;}
 .toast.error{border-left:2px solid var(--red);}
 .toast.info{border-left:2px solid var(--accent);}
 
 /* RESPONSIVE */
 @media(max-width:768px){
-  .burger{display:flex;}
+  .hamburger{display:flex;}
+  .close-btn{display:flex;}
   .sidebar{transform:translateX(-100%);}
   .sidebar.open{transform:translateX(0);}
   .main{margin-left:0;padding:16px 14px 36px;}
@@ -173,8 +164,10 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-<button class="burger" id="burger" onclick="toggleSidebar()" aria-label="Menu">
+<!-- overlay за сайдбаром -->
+
+<!-- hamburger снаружи, только мобиле -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
   <span></span><span></span><span></span>
 </button>
 
@@ -182,12 +175,16 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
   <nav class="sidebar hidden" id="sidebar">
     <div class="logo">
       <div class="logo-icon">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
       </div>
-      <div>
+      <div style="flex:1">
         <div class="logo-text">BOT PANEL</div>
         <div class="logo-sub">Admin Dashboard</div>
       </div>
+      <!-- кнопка закрытия ВНУТРИ сайдбара -->
+      <button class="close-btn" onclick="closeSidebar()" title="Close">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="nav">
       <div class="nav-item active" onclick="goPage('dashboard')">
@@ -211,137 +208,103 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
 
   <main class="main">
     <div class="topbar">
-      <div>
-        <div class="page-title" id="pageTitle">Dashboard</div>
-        <div class="page-sub" id="pageSub">Overview & stats</div>
-      </div>
+      <div><div class="page-title" id="pageTitle">Dashboard</div><div class="page-sub" id="pageSub">Overview & stats</div></div>
       <button class="cfg-btn" onclick="openCfg()">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
         Settings
       </button>
     </div>
 
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="stats">
         <div class="stat-card">
           <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="stat-lbl">Whitelisted</div>
-          <div class="stat-val" id="s-wl">—</div>
+          <div class="stat-lbl">Whitelisted</div><div class="stat-val" id="s-wl">—</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.9 1.17h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-          <div class="stat-lbl">Channels</div>
-          <div class="stat-val" id="s-ch">—</div>
+          <div class="stat-lbl">Channels</div><div class="stat-val" id="s-ch">—</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" id="s-bot-ico"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="stat-card" id="bot-card">
+          <div class="stat-icon"><svg id="s-bot-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
           <div class="stat-lbl" id="s-bot-lbl">Bot Status</div>
-          <div class="stat-val" style="font-size:13px;margin-top:11px;color:var(--muted2)" id="s-bot-status">CHECKING</div>
+          <div class="stat-val" style="font-size:13px;margin-top:11px;color:var(--muted2)" id="s-bot-val">CHECKING</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="stat-lbl">Last Refresh</div>
-          <div class="stat-val" style="font-size:12px;margin-top:11px" id="s-time">—</div>
+          <div class="stat-lbl">Last Refresh</div><div class="stat-val" style="font-size:12px;margin-top:11px" id="s-time">—</div>
         </div>
       </div>
       <div class="card">
-        <div class="card-head">
-          <div class="card-title">Recent Whitelist</div>
-          <button class="btn btn-ghost btn-sm" onclick="goPage('whitelist')">View all →</button>
-        </div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>#</th><th>User ID</th><th>Added</th></tr></thead>
-          <tbody id="d-wl"><tr class="loader-row"><td colspan="3"><div class="spin"></div></td></tr></tbody></table>
-        </div>
+        <div class="card-head"><div class="card-title">Recent Whitelist</div><button class="btn btn-ghost btn-sm" onclick="goPage('whitelist')">View all →</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>User ID</th><th>Added</th></tr></thead><tbody id="d-wl"><tr class="loader-row no-hover"><td colspan="3"><div class="spin"></div></td></tr></tbody></table></div>
       </div>
       <div class="card">
-        <div class="card-head">
-          <div class="card-title">Channels</div>
-          <button class="btn btn-ghost btn-sm" onclick="goPage('channels')">View all →</button>
-        </div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>#</th><th>Name</th><th>Channel ID</th><th>Username</th></tr></thead>
-          <tbody id="d-ch"><tr class="loader-row"><td colspan="4"><div class="spin"></div></td></tr></tbody></table>
-        </div>
+        <div class="card-head"><div class="card-title">Channels</div><button class="btn btn-ghost btn-sm" onclick="goPage('channels')">View all →</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Channel ID</th><th>Username</th></tr></thead><tbody id="d-ch"><tr class="loader-row no-hover"><td colspan="4"><div class="spin"></div></td></tr></tbody></table></div>
       </div>
     </div>
 
+    <!-- WHITELIST -->
     <div class="page" id="page-whitelist">
       <div class="card">
         <div class="card-head">
           <div class="card-title">Whitelist Management</div>
-          <button class="btn btn-primary btn-sm" onclick="openAddUser()">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add User
-          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAddUser()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add User</button>
         </div>
         <div class="sbar">
-          <input class="sinput" id="wl-search" placeholder="Search by user ID..." autocomplete="off" oninput="filterWL()">
+          <input class="sinput" id="wl-search" placeholder="Search by user ID..." autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterWL()">
           <button class="btn btn-ghost btn-sm" onclick="loadWL()">↻ Refresh</button>
         </div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>#</th><th>User ID</th><th>Added</th><th>Actions</th></tr></thead>
-          <tbody id="wl-tbl"><tr class="loader-row"><td colspan="4"><div class="spin"></div></td></tr></tbody></table>
-        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>User ID</th><th>Added</th><th>Actions</th></tr></thead><tbody id="wl-tbl"><tr class="loader-row no-hover"><td colspan="4"><div class="spin"></div></td></tr></tbody></table></div>
       </div>
     </div>
 
+    <!-- CHANNELS -->
     <div class="page" id="page-channels">
       <div class="card">
         <div class="card-head">
           <div class="card-title">Channel Management</div>
-          <button class="btn btn-primary btn-sm" onclick="openAddCh()">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Channel
-          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAddCh()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Channel</button>
         </div>
         <div class="sbar">
-          <input class="sinput" id="ch-search" placeholder="Search by name or ID..." autocomplete="off" oninput="filterCH()">
+          <input class="sinput" id="ch-search" placeholder="Search by name or ID..." autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="filterCH()">
           <button class="btn btn-ghost btn-sm" onclick="loadCH()">↻ Refresh</button>
         </div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>#</th><th>Name</th><th>Channel ID</th><th>Username</th><th>Actions</th></tr></thead>
-          <tbody id="ch-tbl"><tr class="loader-row"><td colspan="5"><div class="spin"></div></td></tr></tbody></table>
-        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Channel ID</th><th>Username</th><th>Actions</th></tr></thead><tbody id="ch-tbl"><tr class="loader-row no-hover"><td colspan="5"><div class="spin"></div></td></tr></tbody></table></div>
       </div>
     </div>
 
+    <!-- SEND -->
     <div class="page" id="page-send">
       <div class="card">
-        <div class="card-head">
-          <div class="card-title">Select Channel</div>
-          <button class="btn btn-ghost btn-sm" onclick="renderSendCh()">↻ Refresh</button>
-        </div>
+        <div class="card-head"><div class="card-title">Select Channel</div><button class="btn btn-ghost btn-sm" onclick="renderSendCh()">↻ Refresh</button></div>
         <div id="send-chs" class="ch-grid"></div>
       </div>
       <div class="card" id="send-form" style="display:none">
-        <div class="card-head">
-          <div class="card-title">Message for <span id="send-ch-label" style="color:var(--accent)"></span></div>
-        </div>
+        <div class="card-head"><div class="card-title">Message for <span id="send-ch-label" style="color:#c084fc"></span></div></div>
         <textarea class="msg-area" id="msg-txt" placeholder="Type your message here..." oninput="updatePreview()"></textarea>
         <div class="divider"></div>
         <div style="font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Preview</div>
         <div class="preview" id="msg-preview">Write a message above...</div>
         <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="sendMsg()" id="send-btn">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            Send to channel
-          </button>
+          <button class="btn btn-primary" onclick="sendMsg()" id="send-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send to channel</button>
           <button class="btn btn-ghost" onclick="clearSend()">Cancel</button>
         </div>
       </div>
     </div>
-
   </main>
 </div>
 
+<!-- MODALS -->
 <div class="modal-wrap" id="m-cfg">
   <div class="modal">
     <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg> Settings</h3>
     <p>Stored in your browser — never sent anywhere</p>
-    <div class="form-grp"><label>Supabase URL</label><input class="sinput" id="c-url" placeholder="https://xxx.supabase.co" style="width:100%"></div>
-    <div class="form-grp"><label>Supabase Anon Key</label><input class="sinput" id="c-key" placeholder="eyJ..." type="password" style="width:100%"></div>
-    <div class="form-grp"><label>Bot Token</label><input class="sinput" id="c-bot" placeholder="1234567890:AAE..." type="password" style="width:100%"></div>
+    <div class="form-grp"><label>Supabase URL</label><input class="sinput" id="c-url" placeholder="https://xxx.supabase.co" autocomplete="off" style="width:100%"></div>
+    <div class="form-grp"><label>Supabase Anon Key</label><input class="sinput" id="c-key" placeholder="eyJ..." type="password" autocomplete="new-password" style="width:100%"></div>
+    <div class="form-grp"><label>Bot Token</label><input class="sinput" id="c-bot" placeholder="1234567890:AAE..." type="password" autocomplete="new-password" style="width:100%"></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeM('m-cfg')">Cancel</button>
       <button class="btn btn-primary" onclick="saveCfg()">Save</button>
@@ -353,7 +316,7 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
   <div class="modal">
     <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Add to Whitelist</h3>
     <p>Enter the numeric Telegram user ID</p>
-    <div class="form-grp"><label>Telegram User ID</label><input class="sinput" id="n-uid" type="number" placeholder="123456789" style="width:100%" onkeydown="if(event.key==='Enter')addUser()"></div>
+    <div class="form-grp"><label>Telegram User ID</label><input class="sinput" id="n-uid" type="number" placeholder="123456789" autocomplete="off" style="width:100%" onkeydown="if(event.key==='Enter')addUser()"></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeM('m-add-user')">Cancel</button>
       <button class="btn btn-primary" onclick="addUser()">Add User</button>
@@ -365,9 +328,9 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
   <div class="modal">
     <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.9 1.17h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Add Channel</h3>
     <p>Bot must be admin in the channel first</p>
-    <div class="form-grp"><label>Channel ID (e.g. -1001234567890)</label><input class="sinput" id="n-chid" placeholder="-1001234567890" style="width:100%"></div>
-    <div class="form-grp"><label>Channel Name</label><input class="sinput" id="n-chname" placeholder="My Channel" style="width:100%"></div>
-    <div class="form-grp"><label>Username (without @, optional)</label><input class="sinput" id="n-chuser" placeholder="mychannel" style="width:100%"></div>
+    <div class="form-grp"><label>Channel ID (e.g. -1001234567890)</label><input class="sinput" id="n-chid" placeholder="-1001234567890" autocomplete="off" style="width:100%"></div>
+    <div class="form-grp"><label>Channel Name</label><input class="sinput" id="n-chname" placeholder="My Channel" autocomplete="off" style="width:100%"></div>
+    <div class="form-grp"><label>Username (without @, optional)</label><input class="sinput" id="n-chuser" placeholder="mychannel" autocomplete="off" style="width:100%"></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeM('m-add-ch')">Cancel</button>
       <button class="btn btn-primary" onclick="addCh()">Add Channel</button>
@@ -381,10 +344,7 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
     <p id="conf-msg">This action cannot be undone.</p>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeM('m-confirm')">Cancel</button>
-      <button class="btn btn-danger" id="conf-ok">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        Delete
-      </button>
+      <button class="btn btn-danger" id="conf-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete</button>
     </div>
   </div>
 </div>
@@ -393,27 +353,31 @@ tr:hover td{background:rgba(91,110,245,.03);} tr:has(.empty):hover td, .loader-r
 
 <script>
 let CFG={url:localStorage.getItem('sb_url')||'',key:localStorage.getItem('sb_key')||'',bot:localStorage.getItem('tg_bot')||''};
-let wlData=[],chData=[],selCh=null;
-let botCheckInterval=null;
+let wlData=[],chData=[],selCh=null,botInterval=null;
 
 /* ── SIDEBAR ── */
 function toggleSidebar(){
-  const s=document.getElementById('sidebar'),b=document.getElementById('burger'),o=document.getElementById('overlay');
+  const s=document.getElementById('sidebar'),h=document.getElementById('hamburger');
   if(s.classList.contains('open')){closeSidebar();}
-  else{s.classList.remove('hidden');s.classList.add('open');b.classList.add('open');o.classList.add('open');}
+  else{s.classList.remove('hidden');s.classList.add('open');if(h)h.style.display='none';}
 }
 function closeSidebar(){
-  const s=document.getElementById('sidebar'),b=document.getElementById('burger'),o=document.getElementById('overlay');
-  s.classList.remove('open');b.classList.remove('open');o.classList.remove('open');
-  if(window.innerWidth<=768){setTimeout(()=>{if(!s.classList.contains('open'))s.classList.add('hidden');},260);}
+  const s=document.getElementById('sidebar'),h=document.getElementById('hamburger');
+  s.classList.remove('open');
+  if(window.innerWidth<=768){
+    setTimeout(()=>{
+      if(!s.classList.contains('open')){
+        s.classList.add('hidden');
+        if(h)h.style.display='';  // show hamburger only after sidebar is gone
+      }
+    },260);
+  }
 }
-function initSidebar(){
-  document.getElementById('sidebar').classList[window.innerWidth>768?'remove':'add']('hidden');
-}
+function initSidebar(){document.getElementById('sidebar').classList[window.innerWidth>768?'remove':'add']('hidden');}
 window.addEventListener('resize',()=>{
-  const s=document.getElementById('sidebar'),o=document.getElementById('overlay'),b=document.getElementById('burger');
-  if(window.innerWidth>768){s.classList.remove('hidden','open');o.classList.remove('open');b.classList.remove('open');}
-  else if(!s.classList.contains('open')){s.classList.add('hidden');}
+  const s=document.getElementById('sidebar'),h=document.getElementById('hamburger');
+  if(window.innerWidth>768){s.classList.remove('hidden','open');if(h)h.style.display='';}
+  else if(!s.classList.contains('open'))s.classList.add('hidden');
 });
 
 /* ── CONFIG ── */
@@ -429,21 +393,41 @@ function saveCfg(){
 /* ── SUPABASE ── */
 async function sb(path,opts={}){
   if(!CFG.url||!CFG.key){toast('Configure Supabase in Settings','error');throw new Error('no-cfg');}
-  const res=await fetch(CFG.url+'/rest/v1/'+path,{
-    headers:{'apikey':CFG.key,'Authorization':'Bearer '+CFG.key,'Content-Type':'application/json','Prefer':opts.prefer||'return=representation'},
-    ...opts
-  });
+  const res=await fetch(CFG.url+'/rest/v1/'+path,{headers:{'apikey':CFG.key,'Authorization':'Bearer '+CFG.key,'Content-Type':'application/json','Prefer':opts.prefer||'return=representation'},...opts});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||res.statusText);}
   const t=await res.text();return t?JSON.parse(t):[];
 }
 
+/* ── BOT STATUS ── */
+async function checkBot(){
+  const lbl=document.getElementById('s-bot-lbl'),val=document.getElementById('s-bot-val'),ico=document.getElementById('s-bot-ico');
+  if(!CFG.bot){
+    lbl.textContent='Bot Status';val.textContent='NO TOKEN';
+    val.style.color='var(--yellow)';ico.style.stroke='var(--yellow)';return;
+  }
+  try{
+    const res=await fetch('https://api.telegram.org/bot'+CFG.bot+'/getMe');
+    const data=await res.json();
+    if(data.ok){
+      lbl.textContent='@'+data.result.username;
+      val.textContent='ONLINE';val.style.color='#a78bfa';ico.style.stroke='#a78bfa';
+    }else{
+      lbl.textContent='Bot Status';val.textContent='BAD TOKEN';
+      val.style.color='var(--red)';ico.style.stroke='var(--red)';
+    }
+  }catch(e){
+    lbl.textContent='Bot Status';val.textContent='OFFLINE';
+    val.style.color='var(--red)';ico.style.stroke='var(--red)';
+  }
+}
+function startBotCheck(){
+  if(botInterval)clearInterval(botInterval);
+  checkBot();
+  botInterval=setInterval(checkBot,15000);
+}
+
 /* ── NAV ── */
-const meta={
-  dashboard:['Dashboard','Overview & stats'],
-  whitelist:['Whitelist','User access management'],
-  channels:['Channels','Telegram channel management'],
-  send:['Send Message','Select a channel and compose']
-};
+const meta={dashboard:['Dashboard','Overview & stats'],whitelist:['Whitelist','User access management'],channels:['Channels','Telegram channel management'],send:['Send Message','Select a channel and compose']};
 function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -455,17 +439,13 @@ function goPage(id){
   if(window.innerWidth<=768)closeSidebar();
 }
 
-/* ── COPY HELPER ── */
-function copyText(text){
-  navigator.clipboard.writeText(text).then(()=>toast('Copied!','success')).catch(()=>{
-    const el=document.createElement('textarea');el.value=text;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Copied!','success');
-  });
-}
+/* ── COPY ── */
+function copyText(t){navigator.clipboard.writeText(t).then(()=>toast('Copied!','success')).catch(()=>toast('Failed','error'));}
 
 /* ── WHITELIST ── */
 async function loadWL(){
-  document.getElementById('wl-tbl').innerHTML='<tr class="loader-row"><td colspan="4"><div class="spin"></div></td></tr>';
-  document.getElementById('d-wl').innerHTML='<tr class="loader-row"><td colspan="3"><div class="spin"></div></td></tr>';
+  document.getElementById('wl-tbl').innerHTML='<tr class="loader-row no-hover"><td colspan="4"><div class="spin"></div></td></tr>';
+  document.getElementById('d-wl').innerHTML='<tr class="loader-row no-hover"><td colspan="3"><div class="spin"></div></td></tr>';
   try{
     wlData=await sb('whitelist?order=created_at.desc');
     renderWL(wlData);renderDashWL(wlData);
@@ -474,26 +454,17 @@ async function loadWL(){
 }
 function renderWL(data){
   const tb=document.getElementById('wl-tbl');
-  if(!data.length){tb.innerHTML='<tr><td colspan="4"><div class="empty"><div class="big-ico">👥</div>No users in whitelist</div></td></tr>';return;}
-  tb.innerHTML=data.map((r,i)=>`
-    <tr>
-      <td><span class="badge b-blue">${i+1}</span></td>
-      <td>
-        <code style="font-size:11px">${r.user_id}</code>
-        <button class="btn-copy" onclick="copyText('${r.user_id}')" title="Copy ID">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        </button>
-      </td>
-      <td style="color:var(--muted2);font-size:10px">${r.created_at?new Date(r.created_at).toLocaleString('en'):'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="confirmDel('user',${r.user_id})">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete
-      </button></td>
-    </tr>`).join('');
+  if(!data.length){tb.innerHTML='<tr class="no-hover"><td colspan="4"><div class="empty">👥<br>No users in whitelist</div></td></tr>';return;}
+  tb.innerHTML=data.map((r,i)=>`<tr>
+    <td><span class="badge b-blue">${i+1}</span></td>
+    <td><code style="font-size:11px">${r.user_id}</code> <button class="btn-copy" onclick="copyText('${r.user_id}')" title="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></td>
+    <td style="color:var(--muted2);font-size:10px">${r.created_at?new Date(r.created_at).toLocaleString('en'):'—'}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="confirmDel('user',${r.user_id})"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete</button></td>
+  </tr>`).join('');
 }
 function renderDashWL(data){
-  const tb=document.getElementById('d-wl');
-  const top=data.slice(0,5);
-  if(!top.length){tb.innerHTML='<tr><td colspan="3" class="empty">Empty</td></tr>';return;}
+  const tb=document.getElementById('d-wl'),top=data.slice(0,5);
+  if(!top.length){tb.innerHTML='<tr class="no-hover"><td colspan="3"><div class="empty">No data</div></td></tr>';return;}
   tb.innerHTML=top.map((r,i)=>`<tr><td><span class="badge b-blue">${i+1}</span></td><td><code style="font-size:11px">${r.user_id}</code></td><td style="color:var(--muted2);font-size:10px">${r.created_at?new Date(r.created_at).toLocaleString('en'):'—'}</td></tr>`).join('');
 }
 function filterWL(){const q=document.getElementById('wl-search').value.toLowerCase();renderWL(wlData.filter(r=>String(r.user_id).includes(q)));}
@@ -511,8 +482,8 @@ async function delUser(uid){
 
 /* ── CHANNELS ── */
 async function loadCH(){
-  document.getElementById('ch-tbl').innerHTML='<tr class="loader-row"><td colspan="5"><div class="spin"></div></td></tr>';
-  document.getElementById('d-ch').innerHTML='<tr class="loader-row"><td colspan="4"><div class="spin"></div></td></tr>';
+  document.getElementById('ch-tbl').innerHTML='<tr class="loader-row no-hover"><td colspan="5"><div class="spin"></div></td></tr>';
+  document.getElementById('d-ch').innerHTML='<tr class="loader-row no-hover"><td colspan="4"><div class="spin"></div></td></tr>';
   try{
     chData=await sb('channels?order=created_at.desc');
     renderCH(chData);renderDashCH(chData);
@@ -521,35 +492,24 @@ async function loadCH(){
 }
 function renderCH(data){
   const tb=document.getElementById('ch-tbl');
-  if(!data.length){tb.innerHTML='<tr><td colspan="5"><div class="empty"><div class="big-ico">📡</div>No channels added</div></td></tr>';return;}
-  tb.innerHTML=data.map((r,i)=>`
-    <tr>
-      <td><span class="badge b-blue">${i+1}</span></td>
-      <td><b>${r.title||'—'}</b></td>
-      <td>
-        <code style="font-size:10px;color:var(--muted2)">${r.channel_id}</code>
-        <button class="btn-copy" onclick="copyText('${r.channel_id}')" title="Copy ID">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        </button>
-      </td>
-      <td>${r.username?`<a href="https://t.me/${r.username}" target="_blank" style="color:var(--green);text-decoration:none"><span class="badge b-green">@${r.username}</span></a>`:'<span style="color:var(--muted)">—</span>'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="confirmDel('channel','${r.channel_id}')">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete
-      </button></td>
-    </tr>`).join('');
+  if(!data.length){tb.innerHTML='<tr class="no-hover"><td colspan="5"><div class="empty">📡<br>No channels added</div></td></tr>';return;}
+  tb.innerHTML=data.map((r,i)=>`<tr>
+    <td><span class="badge b-blue">${i+1}</span></td>
+    <td><b>${r.title||'—'}</b></td>
+    <td><code style="font-size:10px;color:var(--muted2)">${r.channel_id}</code> <button class="btn-copy" onclick="copyText('${r.channel_id}')" title="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></td>
+    <td>${r.username?`<a href="https://t.me/${r.username}" target="_blank" style="color:#c4b5fd;text-decoration:none"><span class="badge b-green">@${r.username}</span></a>`:'<span style="color:var(--muted)">—</span>'}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="confirmDel('channel','${r.channel_id}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete</button></td>
+  </tr>`).join('');
 }
 function renderDashCH(data){
-  const tb=document.getElementById('d-ch');
-  const top=data.slice(0,5);
-  if(!top.length){tb.innerHTML='<tr><td colspan="4" class="empty">Empty</td></tr>';return;}
+  const tb=document.getElementById('d-ch'),top=data.slice(0,5);
+  if(!top.length){tb.innerHTML='<tr class="no-hover"><td colspan="4"><div class="empty">No data</div></td></tr>';return;}
   tb.innerHTML=top.map((r,i)=>`<tr><td><span class="badge b-blue">${i+1}</span></td><td>${r.title||'—'}</td><td><code style="font-size:10px;color:var(--muted2)">${r.channel_id}</code></td><td>${r.username?'@'+r.username:'—'}</td></tr>`).join('');
 }
 function filterCH(){const q=document.getElementById('ch-search').value.toLowerCase();renderCH(chData.filter(r=>(r.title||'').toLowerCase().includes(q)||String(r.channel_id).includes(q)||(r.username||'').toLowerCase().includes(q)));}
 function openAddCh(){['n-chid','n-chname','n-chuser'].forEach(id=>document.getElementById(id).value='');openM('m-add-ch');}
 async function addCh(){
-  const id=document.getElementById('n-chid').value.trim();
-  const title=document.getElementById('n-chname').value.trim();
-  const uname=document.getElementById('n-chuser').value.trim().replace('@','');
+  const id=document.getElementById('n-chid').value.trim(),title=document.getElementById('n-chname').value.trim(),uname=document.getElementById('n-chuser').value.trim().replace('@','');
   if(!id||!title){toast('Fill in ID and name','error');return;}
   try{await sb('channels',{method:'POST',body:JSON.stringify({channel_id:id,title,username:uname})});closeM('m-add-ch');toast('Channel added','success');loadCH();}
   catch(e){toast('Error: '+e.message,'error');}
@@ -562,39 +522,25 @@ async function delCh(cid){
 /* ── CONFIRM ── */
 function confirmDel(type,id){
   document.getElementById('conf-title').textContent=type==='user'?'Remove user '+id+'?':'Remove channel?';
-  document.getElementById('conf-msg').textContent=type==='user'?'User '+id+' will lose access to the bot.':'Channel '+id+' will be removed from the panel.';
-  const btn=document.getElementById('conf-ok');
-  btn.onclick=()=>{closeM('m-confirm');type==='user'?delUser(id):delCh(id);};
+  document.getElementById('conf-msg').textContent=type==='user'?'User '+id+' will lose bot access.':'Channel '+id+' will be removed.';
+  document.getElementById('conf-ok').onclick=()=>{closeM('m-confirm');type==='user'?delUser(id):delCh(id);};
   openM('m-confirm');
 }
 
 /* ── SEND ── */
 function renderSendCh(){
   const el=document.getElementById('send-chs');
-  if(!chData.length){el.innerHTML='<div class="empty" style="width:100%;grid-column:1/-1"><div class="big-ico">📡</div>No channels. Add them in the Channels tab.</div>';return;}
-  el.innerHTML=chData.map(ch=>`
-    <div class="ch-card ${selCh&&selCh.channel_id===ch.channel_id?'sel':''}"
-         onclick='selectCh(${JSON.stringify(ch).replace(/'/g,"&#39;")})'>
-      <div class="ch-name">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.9 1.17h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        ${ch.title||'Untitled'}
-      </div>
-      <div class="ch-id">${ch.username?'@'+ch.username:ch.channel_id}</div>
-    </div>`).join('');
+  if(!chData.length){el.innerHTML='<div class="empty" style="width:100%;grid-column:1/-1">📡<br>No channels. Add them in the Channels tab.</div>';return;}
+  el.innerHTML=chData.map(ch=>`<div class="ch-card ${selCh&&selCh.channel_id===ch.channel_id?'sel':''}" onclick='selectCh(${JSON.stringify(ch).replace(/'/g,"&#39;")})'>
+    <div class="ch-name"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.9 1.17h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${ch.title||'Untitled'}</div>
+    <div class="ch-id">${ch.username?'@'+ch.username:ch.channel_id}</div>
+  </div>`).join('');
 }
-function selectCh(ch){
-  selCh=ch;renderSendCh();
-  const name=ch.username?'@'+ch.username:ch.title;
-  document.getElementById('send-ch-label').textContent=name;
-  document.getElementById('send-form').style.display='block';
-  updatePreview();
-}
+function selectCh(ch){selCh=ch;renderSendCh();document.getElementById('send-ch-label').textContent=ch.username?'@'+ch.username:ch.title;document.getElementById('send-form').style.display='block';updatePreview();}
 function updatePreview(){
-  const txt=document.getElementById('msg-txt').value;
-  if(!selCh)return;
+  const txt=document.getElementById('msg-txt').value;if(!selCh)return;
   const name=selCh.username?'@'+selCh.username:selCh.title;
-  const rawId=String(selCh.channel_id).replace('-100','');
-  const link=selCh.username?'https://t.me/'+selCh.username:'https://t.me/c/'+rawId;
+  const link=selCh.username?'https://t.me/'+selCh.username:'https://t.me/c/'+String(selCh.channel_id).replace('-100','');
   document.getElementById('msg-preview').innerHTML=(txt||'')+`\n\n<a href="${link}">📢 Subscribe to ${name}</a>`;
 }
 async function sendMsg(){
@@ -603,95 +549,31 @@ async function sendMsg(){
   if(!selCh){toast('Select a channel','error');return;}
   if(!CFG.bot){toast('Set Bot Token in Settings','error');return;}
   const name=selCh.username?'@'+selCh.username:selCh.title;
-  const rawId=String(selCh.channel_id).replace('-100','');
-  const link=selCh.username?'https://t.me/'+selCh.username:'https://t.me/c/'+rawId;
+  const link=selCh.username?'https://t.me/'+selCh.username:'https://t.me/c/'+String(selCh.channel_id).replace('-100','');
   const final=txt+`\n\n<a href="${link}">📢 Subscribe to ${name}</a>`;
-  const btn=document.getElementById('send-btn');
-  btn.innerHTML='<div class="spin spin-sm"></div> Sending...';btn.disabled=true;
+  const btn=document.getElementById('send-btn');btn.innerHTML='<div class="spin spin-sm"></div> Sending...';btn.disabled=true;
   try{
-    const res=await fetch(`https://api.telegram.org/bot${CFG.bot}/sendMessage`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:selCh.channel_id,text:final,parse_mode:'HTML'})
-    });
+    const res=await fetch('https://api.telegram.org/bot'+CFG.bot+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:selCh.channel_id,text:final,parse_mode:'HTML'})});
     const data=await res.json();
-    if(data.ok){toast('✓ Sent to '+name,'success');clearSend();}
-    else toast('TG error: '+data.description,'error');
+    if(data.ok){toast('Sent to '+name,'success');clearSend();}else toast('TG: '+data.description,'error');
   }catch(e){toast('Error: '+e.message,'error');}
-  finally{
-    btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send to channel';
-    btn.disabled=false;
-  }
+  finally{btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send to channel';btn.disabled=false;}
 }
 function clearSend(){selCh=null;document.getElementById('msg-txt').value='';document.getElementById('msg-preview').innerHTML='Write a message above...';document.getElementById('send-form').style.display='none';renderSendCh();}
 
 /* ── MODAL ── */
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-wrap').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});});
+document.querySelectorAll('.modal-wrap').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
 
 /* ── TOAST ── */
-function toast(msg,type='info'){
-  const c=document.getElementById('toasts'),t=document.createElement('div');
-  t.className='toast '+type;t.textContent=msg;c.appendChild(t);
-  setTimeout(()=>t.style.opacity='0',2600);setTimeout(()=>t.remove(),3100);
-}
-
-/* ── DYNAMIC BOT STATUS CHECK ── */
-async function checkBotStatus() {
-  const statusEl = document.getElementById('s-bot-status');
-  const labelEl = document.getElementById('s-bot-lbl');
-  const iconEl = document.getElementById('s-bot-ico');
-  
-  if (!CFG.bot) {
-    labelEl.textContent = 'Bot Status';
-    statusEl.textContent = 'NO TOKEN';
-    statusEl.style.color = 'var(--yellow)';
-    if(iconEl) iconEl.style.stroke = 'var(--yellow)';
-    return;
-  }
-  
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${CFG.bot}/getMe`);
-    if (!res.ok) throw new Error('invalid-token');
-    
-    const data = await res.json();
-    if (data.ok && data.result) {
-      labelEl.textContent = `@${data.result.username}`;
-      statusEl.textContent = 'ONLINE';
-      statusEl.style.color = 'var(--green)';
-      if(iconEl) iconEl.style.stroke = 'var(--green)';
-    } else {
-      throw new Error('bad-response');
-    }
-  } catch (e) {
-    labelEl.textContent = 'Bot Status';
-    if (e.message === 'invalid-token') {
-      statusEl.textContent = 'BAD TOKEN';
-      statusEl.style.color = 'var(--red)';
-      if(iconEl) iconEl.style.stroke = 'var(--red)';
-    } else {
-      statusEl.textContent = 'OFFLINE';
-      statusEl.style.color = 'var(--red)';
-      if(iconEl) iconEl.style.stroke = 'var(--red)';
-    }
-  }
-}
-
-function startBotStatusInterval() {
-  if (botCheckInterval) clearInterval(botCheckInterval);
-  checkBotStatus();
-  botCheckInterval = setInterval(checkBotStatus, 10000);
-}
+function toast(msg,type='info'){const c=document.getElementById('toasts'),t=document.createElement('div');t.className='toast '+type;t.textContent=msg;c.appendChild(t);setTimeout(()=>t.style.opacity='0',2600);setTimeout(()=>t.remove(),3100);}
 
 /* ── INIT ── */
-async function loadAll(){
-  document.getElementById('s-time').textContent=new Date().toLocaleTimeString('en');
-  startBotStatusInterval();
-  await Promise.all([loadWL(),loadCH()]);
-}
+async function loadAll(){document.getElementById('s-time').textContent=new Date().toLocaleTimeString('en');startBotCheck();await Promise.all([loadWL(),loadCH()]);}
 initSidebar();
 if(!CFG.url||!CFG.key){setTimeout(()=>{toast('Configure Supabase in Settings','info');openCfg();},500);}
-else{loadAll();}
+else loadAll();
 </script>
 </body>
 </html>
