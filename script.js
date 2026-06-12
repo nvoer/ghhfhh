@@ -29,58 +29,85 @@ async function sb(path, opts = {}) {
   const t = await res.text(); return t ? JSON.parse(t) : [];
 }
 
-/* ── BOT STATUS ── */
-/* ── BOT STATUS (REAL-TIME UPDATE) ── */
+/* ── BOT STATUS (ПРОВЕРКА РЕАЛЬНОГО ОНЛАЙНА/ОФЛАЙНА) ── */
 async function checkBot() {
   const lbl = document.getElementById('s-bot-lbl');
   const val = document.getElementById('s-bot-val');
   const ico = document.getElementById('s-bot-ico');
   const wrap = ico.closest('.status-ico-wrap');
 
-  if (!CFG.bot) {
+  // Если нет настроек базы
+  if (!CFG.url || !CFG.key) {
     lbl.textContent = 'Bot Status';
-    val.textContent = 'NO TOKEN';
+    val.textContent = 'NO CONFIG';
     val.className = 'side-value status-no-token';
     wrap.className = 'status-ico-wrap pulse-yellow';
     return;
   }
 
   try {
-    // Используем AbortController, чтобы долгий запрос не вешал статус при обрыве сети
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-    const res = await fetch('https://api.telegram.org/bot' + CFG.bot + '/getMe', { signal: controller.signal });
-    clearTimeout(timeoutId);
-    
-    const data = await res.json();
-
-    if (data.ok) {
-      lbl.textContent = '@' + data.result.username;
-      val.textContent = 'ONLINE';
-      val.className = 'side-value status-online';
-      wrap.className = 'status-ico-wrap pulse-green';
-    } else {
-      // Если Telegram ответил, но data.ok === false -> Токен изменён или заблокирован
-      lbl.textContent = 'Bot Status';
-      val.textContent = 'BAD TOKEN';
-      val.className = 'side-value status-bad-token';
-      wrap.className = 'status-ico-wrap pulse-red';
+    // 1. Сначала подтягиваем юзернейм из телеграма (чтобы красиво отображался в панели)
+    let tgUsername = 'Bot Status';
+    if (CFG.bot) {
+      try {
+        const tgRes = await fetch('https://api.telegram.org/bot' + CFG.bot + '/getMe');
+        const tgJson = await tgRes.json();
+        if (tgJson.ok) {
+          tgUsername = '@' + tgJson.result.username;
+        } else {
+          // Если токен вообще левый или забанен
+          lbl.textContent = 'Bot Status';
+          val.textContent = 'BAD TOKEN';
+          val.className = 'side-value status-bad-token';
+          wrap.className = 'status-ico-wrap pulse-red';
+          return;
+        }
+      } catch(e) { 
+        // Игнорируем ошибку сети до ТГ, главное проверить скрипт через базу
+      }
     }
+
+    // 2. Идем в Supabase и смотрим, когда бот пинговал базу в последний раз
+    const statusData = await sb('bot_status?select=last_ping&id=eq.1');
+    
+    if (statusData && statusData.length > 0) {
+      const lastPingTime = new Date(statusData[0].last_ping).getTime();
+      const nowTime = new Date().getTime();
+      
+      // Разница в миллисекундах. Если бот молчит больше 25 секунд — значит его выключили
+      const diffSeconds = (nowTime - lastPingTime) / 1000;
+
+      if (diffSeconds < 25) {
+        lbl.textContent = tgUsername;
+        val.textContent = 'ONLINE';
+        val.className = 'side-value status-online';
+        wrap.className = 'status-ico-wrap pulse-green';
+      } else {
+        lbl.textContent = tgUsername;
+        val.textContent = 'OFFLINE'; // Скрипт НЕ ЗАПУЩЕН на ПК
+        val.className = 'side-value status-offline';
+        wrap.className = 'status-ico-wrap pulse-gray';
+      }
+    } else {
+      lbl.textContent = tgUsername;
+      val.textContent = 'NO DATA';
+      val.className = 'side-value status-offline';
+      wrap.className = 'status-ico-wrap pulse-gray';
+    }
+
   } catch (e) {
-    // Если сработал abort (таймаут) или нет интернета вообще
     lbl.textContent = 'Bot Status';
-    val.textContent = 'OFFLINE';
+    val.textContent = 'ERR BASE';
     val.className = 'side-value status-offline';
     wrap.className = 'status-ico-wrap pulse-gray';
   }
 }
 
+// Заставим панель дергать базу почаще (каждые 5 секунд), чтобы статус менялся без задержек
 function startBotCheck() {
   if (botInterval) clearInterval(botInterval);
   checkBot();
-  // Уменьшаем интервал до 4 секунд для эффекта "реального времени"
-  botInterval = setInterval(checkBot, 4000); 
+  botInterval = setInterval(checkBot, 5000); 
 }
 
 /* ── NAV (ИЗМЕНЕНО ПОД НОВЫЕ КЛАССЫ ИЗ DSF.png) ── */
